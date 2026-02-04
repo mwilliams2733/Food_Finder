@@ -618,10 +618,41 @@
 
         .voting-title { font-size: 20px; font-weight: 700; }
 
+        .add-voter-section {
+            margin-bottom: 20px;
+        }
+
         .add-voter-form {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+        }
+
+        .contacts-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .contacts-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .contacts-btn:active {
+            transform: translateY(0);
         }
 
         .voters-list {
@@ -996,6 +1027,7 @@
             const [votes, setVotes] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTES) || '{}'));
             const [newVoter, setNewVoter] = useState('');
             const [activeVoter, setActiveVoter] = useState(voters[0] || '');
+            const [contactsSupported] = useState(() => 'contacts' in navigator && 'ContactsManager' in window);
 
             const votingRestaurants = [...restaurants.slice(0, 10), ...favorites.filter(f => !restaurants.find(r => r.placeId === f.placeId))].slice(0, 15);
 
@@ -1011,6 +1043,25 @@
                     setVoters([...voters, name]);
                     setActiveVoter(name);
                     setNewVoter('');
+                }
+            };
+
+            const addFromContacts = async () => {
+                try {
+                    const contacts = await navigator.contacts.select(['name'], { multiple: true });
+                    const newNames = [];
+                    contacts.forEach(contact => {
+                        const name = contact.name?.[0];
+                        if (name && !voters.includes(name)) {
+                            newNames.push(name);
+                        }
+                    });
+                    if (newNames.length > 0) {
+                        setVoters([...voters, ...newNames]);
+                        setActiveVoter(newNames[0]);
+                    }
+                } catch (err) {
+                    console.log('Contact picker cancelled or error:', err);
                 }
             };
 
@@ -1047,17 +1098,28 @@
                         {winner && <div style={{color: 'var(--success)', fontWeight: 700}}>🏆 Leading: {winner.name}</div>}
                     </div>
 
-                    <form className="add-voter-form" onSubmit={addVoter}>
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Add family member..."
-                            value={newVoter}
-                            onChange={e => setNewVoter(e.target.value)}
-                            style={{flex: 1}}
-                        />
-                        <button type="submit" className="search-btn">Add</button>
-                    </form>
+                    <div className="add-voter-section">
+                        <form className="add-voter-form" onSubmit={addVoter}>
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Add family member..."
+                                value={newVoter}
+                                onChange={e => setNewVoter(e.target.value)}
+                                style={{flex: 1}}
+                            />
+                            <button type="submit" className="search-btn">Add</button>
+                        </form>
+                        {contactsSupported && (
+                            <button
+                                type="button"
+                                className="contacts-btn"
+                                onClick={addFromContacts}
+                            >
+                                📇 Add from Contacts
+                            </button>
+                        )}
+                    </div>
 
                     {voters.length > 0 && (
                         <div className="voters-list">
