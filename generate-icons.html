@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; background: #1a1a2e; color: #fff; }
+        h1 { margin-bottom: 20px; }
+        .icon-preview { display: flex; gap: 20px; margin: 20px 0; }
+        canvas { border-radius: 20%; }
+        button { background: #4ade80; color: #000; border: none; padding: 12px 24px; font-size: 16px; cursor: pointer; border-radius: 8px; margin: 10px 5px; }
+        button:hover { background: #22c55e; }
+        .instructions { background: #2d2d44; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .done { color: #4ade80; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Food Finder - PWA Icon Generator</h1>
+    <p>Click the buttons below to download the app icons, then save them to the <code>icons</code> folder.</p>
+
+    <div class="icon-preview">
+        <div>
+            <canvas id="icon192" width="192" height="192"></canvas>
+            <br>
+            <button onclick="download(192)">Download 192x192</button>
+        </div>
+        <div>
+            <canvas id="icon512" width="512" height="512"></canvas>
+            <br>
+            <button onclick="download(512)">Download 512x512</button>
+        </div>
+    </div>
+
+    <button onclick="downloadAll()">Download Both Icons</button>
+
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click "Download Both Icons" (or download individually)</li>
+            <li>Save <code>icon-192.png</code> and <code>icon-512.png</code> to the <code>icons</code> folder</li>
+            <li>Delete this HTML file (optional)</li>
+            <li>Deploy the app and install it on your Android phone!</li>
+        </ol>
+    </div>
+
+    <script>
+        function drawIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            const scale = size / 512;
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0a0e17');
+            gradient.addColorStop(1, '#1c2333');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // Draw burger emoji-style icon
+            ctx.save();
+            ctx.translate(size/2, size/2);
+
+            // Top bun
+            ctx.fillStyle = '#f4a460';
+            ctx.beginPath();
+            ctx.ellipse(0, -80*scale, 140*scale, 70*scale, 0, Math.PI, 0);
+            ctx.fill();
+
+            // Sesame seeds
+            ctx.fillStyle = '#fffacd';
+            const seeds = [[-60, -110], [0, -120], [60, -110], [-30, -90], [30, -90]];
+            seeds.forEach(([x, y]) => {
+                ctx.beginPath();
+                ctx.ellipse(x*scale, y*scale, 8*scale, 12*scale, Math.PI/6, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Lettuce
+            ctx.fillStyle = '#4ade80';
+            ctx.beginPath();
+            ctx.moveTo(-150*scale, -20*scale);
+            for(let i = 0; i < 10; i++) {
+                ctx.quadraticCurveTo(
+                    (-120 + i*30)*scale, (i%2 ? -40 : 0)*scale,
+                    (-120 + (i+1)*30)*scale, -20*scale
+                );
+            }
+            ctx.lineTo(150*scale, -20*scale);
+            ctx.lineTo(150*scale, 10*scale);
+            ctx.lineTo(-150*scale, 10*scale);
+            ctx.closePath();
+            ctx.fill();
+
+            // Cheese
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.moveTo(-140*scale, 10*scale);
+            ctx.lineTo(-120*scale, 50*scale);
+            ctx.lineTo(120*scale, 50*scale);
+            ctx.lineTo(140*scale, 10*scale);
+            ctx.closePath();
+            ctx.fill();
+
+            // Patty
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.ellipse(0, 70*scale, 130*scale, 35*scale, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            // Bottom bun
+            ctx.fillStyle = '#deb887';
+            ctx.beginPath();
+            ctx.moveTo(-140*scale, 100*scale);
+            ctx.lineTo(140*scale, 100*scale);
+            ctx.quadraticCurveTo(150*scale, 140*scale, 130*scale, 160*scale);
+            ctx.lineTo(-130*scale, 160*scale);
+            ctx.quadraticCurveTo(-150*scale, 140*scale, -140*scale, 100*scale);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function download(size) {
+            const canvas = document.getElementById('icon' + size);
+            const link = document.createElement('a');
+            link.download = 'icon-' + size + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            download(192);
+            setTimeout(() => download(512), 500);
+        }
+
+        // Draw icons on load
+        drawIcon(document.getElementById('icon192'));
+        drawIcon(document.getElementById('icon512'));
+    </script>
+</body>
+</html>
