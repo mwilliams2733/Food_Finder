@@ -189,6 +189,15 @@
 
         .cuisine-btn:hover { border-color: var(--primary); transform: translateY(-2px); }
         .cuisine-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .cuisine-btn.time-highlight {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(74, 222, 128, 0.15) 100%);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(74, 222, 128, 0.4); }
+            50% { box-shadow: var(--shadow-sm), 0 0 8px 2px rgba(74, 222, 128, 0.3); }
+        }
 
         /* Search Section */
         .search-section {
@@ -233,8 +242,8 @@
 
         .filter-group {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .filter-btn {
@@ -287,6 +296,15 @@
             border-color: var(--primary);
             color: var(--primary);
             background: rgba(211, 35, 35, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .button-group .input-label {
+            visibility: hidden;
         }
 
         /* Recent Searches */
@@ -540,6 +558,43 @@
         .meta-item { color: var(--text-medium); display: flex; align-items: center; gap: 4px; }
         .meta-item.open { color: var(--success); font-weight: 600; }
         .meta-item.closed { color: var(--primary); font-weight: 600; }
+
+        .restaurant-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.happy-hour {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .badge.brunch {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .badge-link {
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+
+        .badge-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
         .price-tag { font-weight: 600; color: var(--success); }
 
         .restaurant-hours {
@@ -925,8 +980,60 @@
             { emoji: '🥗', name: 'Salads' },
             { emoji: '🍝', name: 'Italian' },
             { emoji: '🍛', name: 'Indian' },
-            { emoji: '🥡', name: 'Thai' }
+            { emoji: '🥡', name: 'Thai' },
+            { emoji: '🍹', name: 'Happy Hour', timeAware: 'happyHour' },
+            { emoji: '🥞', name: 'Brunch', timeAware: 'brunch' }
         ];
+
+        // Time-awareness helpers
+        const isHappyHourTime = () => {
+            const now = new Date();
+            const hour = now.getHours();
+            return hour >= 15 && hour < 19; // 3pm - 7pm
+        };
+
+        const isBrunchTime = () => {
+            const now = new Date();
+            const day = now.getDay();
+            const hour = now.getHours();
+            const isWeekend = day === 0 || day === 6; // Sunday or Saturday
+            return isWeekend && hour >= 9 && hour < 14; // 9am - 2pm on weekends
+        };
+
+        const getTimeHighlight = (cuisine) => {
+            if (cuisine.timeAware === 'happyHour' && isHappyHourTime()) return true;
+            if (cuisine.timeAware === 'brunch' && isBrunchTime()) return true;
+            return false;
+        };
+
+        // Detect happy hour/brunch from restaurant data
+        const detectSpecials = (restaurant, searchQuery) => {
+            const specials = { hasHappyHour: false, hasBrunch: false };
+            const searchLower = (searchQuery || '').toLowerCase();
+            const nameLower = (restaurant.name || '').toLowerCase();
+            const typesStr = (restaurant.types || []).join(' ').toLowerCase();
+
+            // Check if searching for happy hour or brunch
+            if (searchLower.includes('happy hour')) {
+                specials.hasHappyHour = true;
+            }
+            if (searchLower.includes('brunch')) {
+                specials.hasBrunch = true;
+            }
+
+            // Check restaurant types and name for indicators
+            const happyHourKeywords = ['bar', 'pub', 'tavern', 'lounge', 'cocktail', 'brewery', 'taproom'];
+            const brunchKeywords = ['brunch', 'breakfast', 'cafe', 'diner', 'bistro', 'bakery'];
+
+            if (happyHourKeywords.some(k => typesStr.includes(k) || nameLower.includes(k))) {
+                specials.hasHappyHour = true;
+            }
+            if (brunchKeywords.some(k => typesStr.includes(k) || nameLower.includes(k))) {
+                specials.hasBrunch = true;
+            }
+
+            return specials;
+        };
 
         // Utilities
         const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -953,10 +1060,13 @@
         );
 
         // Restaurant Card
-        const RestaurantCard = ({ restaurant, isFavorite, onToggleFavorite, isSelected, onClick }) => {
+        const RestaurantCard = ({ restaurant, isFavorite, onToggleFavorite, isSelected, onClick, searchQuery }) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.name)}&destination_place_id=${restaurant.placeId}`;
             const yelpUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name)}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
             const menuUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' menu')}`;
+            const happyHourUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name + ' happy hour')}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
+            const brunchUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name + ' brunch')}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
+            const specials = detectSpecials(restaurant, searchQuery);
 
             const handleShare = async (e) => {
                 e.stopPropagation();
@@ -1004,6 +1114,21 @@
                                 </span>
                             )}
                         </div>
+
+                        {(specials.hasHappyHour || specials.hasBrunch) && (
+                            <div className="restaurant-badges">
+                                {specials.hasHappyHour && (
+                                    <a href={happyHourUrl} target="_blank" rel="noopener noreferrer" className="badge-link" onClick={e => e.stopPropagation()}>
+                                        <span className="badge happy-hour">🍹 Happy Hour</span>
+                                    </a>
+                                )}
+                                {specials.hasBrunch && (
+                                    <a href={brunchUrl} target="_blank" rel="noopener noreferrer" className="badge-link" onClick={e => e.stopPropagation()}>
+                                        <span className="badge brunch">🥞 Brunch</span>
+                                    </a>
+                                )}
+                            </div>
+                        )}
 
                         {restaurant.hours && (
                             <div className="restaurant-hours">🕐 {restaurant.hours}</div>
@@ -1589,8 +1714,12 @@
                             <>
                                 <div className="quick-cuisines">
                                     {CUISINES.map(c => (
-                                        <button key={c.name} className={`cuisine-btn ${searchQuery === c.name ? 'active' : ''}`} onClick={() => handleCuisineClick(c.name)}>
-                                            {c.emoji} {c.name}
+                                        <button
+                                            key={c.name}
+                                            className={`cuisine-btn ${searchQuery === c.name ? 'active' : ''} ${getTimeHighlight(c) ? 'time-highlight' : ''}`}
+                                            onClick={() => handleCuisineClick(c.name)}
+                                        >
+                                            {c.emoji} {c.name} {getTimeHighlight(c) && '✨'}
                                         </button>
                                     ))}
                                 </div>
@@ -1617,14 +1746,19 @@
                                                 ))}
                                             </div>
                                         </div>
-                                        <button type="submit" className="search-btn" disabled={!userLocation || searchLoading}>
-                                            {searchLoading ? 'Searching...' : '🔍 Search'}
-                                        </button>
-                                        {(searchQuery || restaurants.length > 0) && (
-                                            <button type="button" className="clear-btn" onClick={clearSearch}>
-                                                ✕ Clear
-                                            </button>
-                                        )}
+                                        <div className="button-group">
+                                            <label className="input-label">&nbsp;</label>
+                                            <div style={{display: 'flex', gap: '8px'}}>
+                                                <button type="submit" className="search-btn" disabled={!userLocation || searchLoading}>
+                                                    {searchLoading ? 'Searching...' : '🔍 Search'}
+                                                </button>
+                                                {(searchQuery || restaurants.length > 0) && (
+                                                    <button type="button" className="clear-btn" onClick={clearSearch}>
+                                                        ✕ Clear
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
                                     </form>
 
                                     {recentSearches.length > 0 && (
@@ -1712,6 +1846,7 @@
                                                             mapInstanceRef.current?.panTo(r.location);
                                                             mapInstanceRef.current?.setZoom(16);
                                                         }}
+                                                        searchQuery={searchQuery}
                                                     />
                                                 </div>
                                             ))
@@ -1740,6 +1875,7 @@
                                                 onToggleFavorite={toggleFavorite}
                                                 isSelected={false}
                                                 onClick={() => {}}
+                                                searchQuery=""
                                             />
                                         ))}
                                     </div>
