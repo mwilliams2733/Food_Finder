@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0a0e17">
+    <meta name="theme-color" content="#d32323">
     <meta name="description" content="Find nearby restaurants based on your favorite foods">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Food Finder">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -14,21 +14,28 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #0d1117;
-            --bg-tertiary: #161b22;
-            --border-color: #1c2333;
-            --text-primary: #c9d1d9;
-            --text-muted: #8b949e;
-            --accent: #58a6ff;
-            --accent-hover: #79b8ff;
-            --success: #4ade80;
-            --warning: #f59e0b;
-            --error: #f87171;
-            --star: #fbbf24;
+            --primary: #d32323;
+            --primary-dark: #af1c1c;
+            --primary-light: #ff4d4d;
+            --secondary: #0073bb;
+            --bg-white: #ffffff;
+            --bg-light: #f5f5f5;
+            --bg-card: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-medium: #666666;
+            --text-light: #999999;
+            --border: #e6e6e6;
+            --star: #ff8c00;
+            --success: #41a700;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
         }
 
         * {
@@ -38,10 +45,11 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
             min-height: 100vh;
+            line-height: 1.5;
         }
 
         #root {
@@ -50,459 +58,499 @@
             flex-direction: column;
         }
 
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-light); }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* Layout */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
+        /* Header */
         .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 20px 24px;
+            color: white;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .header h1 span {
+        .logo-icon {
+            font-size: 36px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .logo h1 {
             font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
-        .location-status {
+        .location-badge {
             display: flex;
             align-items: center;
             gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 50px;
             font-size: 14px;
-            color: var(--text-muted);
+            backdrop-filter: blur(10px);
         }
 
         .location-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: var(--success);
+            background: #4ade80;
+            animation: pulse 2s infinite;
         }
 
-        .location-dot.error {
-            background: var(--error);
-        }
-
-        .location-dot.loading {
-            background: var(--warning);
-            animation: pulse 1.5s infinite;
-        }
+        .location-dot.error { background: #ff6b6b; animation: none; }
+        .location-dot.loading { background: #fbbf24; }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
         }
 
+        /* Main Layout */
         .main-content {
-            display: flex;
             flex: 1;
-            overflow: hidden;
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 24px;
+            gap: 24px;
         }
 
-        /* Left Panel - Foods List */
+        /* Left Panel - Foods */
         .foods-panel {
             width: 320px;
             min-width: 320px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
         }
 
         .panel-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
         }
 
         .panel-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .panel-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
         }
 
         .add-food-form {
+            padding: 16px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
         }
 
         .add-food-input {
             flex: 1;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 12px;
-            color: var(--text-primary);
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
         }
 
         .add-food-input:focus {
-            border-color: var(--accent);
-        }
-
-        .add-food-input::placeholder {
-            color: var(--text-muted);
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(211, 35, 35, 0.1);
         }
 
         .add-food-btn {
-            background: var(--accent);
-            color: #fff;
+            background: var(--primary);
+            color: white;
             border: none;
-            border-radius: 6px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: var(--radius-sm);
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
-        .add-food-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .add-food-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .add-food-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .add-food-btn:active { transform: translateY(0); }
+        .add-food-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
         .foods-list {
-            flex: 1;
+            padding: 12px;
+            max-height: 300px;
             overflow-y: auto;
-            padding: 8px;
         }
 
         .food-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 8px;
+            padding: 14px;
+            background: var(--bg-light);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
             cursor: grab;
             transition: all 0.2s;
+            border: 2px solid transparent;
         }
 
         .food-item:hover {
-            border-color: var(--accent);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
         }
 
-        .food-item.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-        }
-
-        .food-item.drag-over {
-            border-color: var(--accent);
-            background: rgba(88, 166, 255, 0.1);
-        }
+        .food-item.dragging { opacity: 0.5; }
+        .food-item.drag-over { border-color: var(--secondary); background: #e3f2fd; }
 
         .food-priority {
-            width: 24px;
-            height: 24px;
-            background: var(--accent);
-            color: #fff;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 700;
         }
 
         .food-name {
             flex: 1;
-            font-size: 14px;
-            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dark);
         }
 
         .food-delete {
+            width: 28px;
+            height: 28px;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-light);
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
             transition: all 0.2s;
-            font-size: 18px;
-            line-height: 1;
         }
 
         .food-delete:hover {
-            color: var(--error);
-            background: rgba(248, 113, 113, 0.1);
+            background: #fee2e2;
+            color: var(--primary);
         }
 
         .empty-foods {
             text-align: center;
             padding: 40px 20px;
-            color: var(--text-muted);
+            color: var(--text-medium);
         }
 
-        .empty-foods-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
+        .empty-foods-icon { font-size: 56px; margin-bottom: 12px; }
+
+        /* Controls Card */
+        .controls-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
         }
 
-        /* Right Panel - Map and Results */
-        .results-panel {
-            flex: 1;
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .control-group {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-        }
-
-        .controls-bar {
-            display: flex;
-            gap: 16px;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .distance-selector {
-            display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        .distance-label {
-            font-size: 14px;
-            color: var(--text-muted);
+        .control-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .distance-buttons {
             display: flex;
-            gap: 4px;
+            background: var(--bg-light);
+            border-radius: var(--radius-sm);
+            padding: 4px;
         }
 
         .distance-btn {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            font-size: 13px;
+            background: none;
+            border: none;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
             cursor: pointer;
+            border-radius: 6px;
             transition: all 0.2s;
-        }
-
-        .distance-btn:first-child {
-            border-radius: 6px 0 0 6px;
-        }
-
-        .distance-btn:last-child {
-            border-radius: 0 6px 6px 0;
+            color: var(--text-medium);
         }
 
         .distance-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
         }
 
-        .distance-btn:hover:not(.active) {
-            border-color: var(--accent);
-        }
+        .distance-btn:hover:not(.active) { background: #e0e0e0; }
 
-        .open-only-toggle {
+        .toggle-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            cursor: pointer;
-            user-select: none;
         }
 
-        .open-only-toggle input {
-            display: none;
-        }
-
-        .toggle-slider {
-            width: 44px;
-            height: 24px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+        .toggle {
             position: relative;
-            transition: all 0.2s;
+            width: 50px;
+            height: 28px;
+            cursor: pointer;
         }
 
-        .toggle-slider::after {
-            content: '';
+        .toggle input { display: none; }
+
+        .toggle-track {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            background: var(--text-muted);
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
+            inset: 0;
+            background: #ccc;
+            border-radius: 14px;
             transition: all 0.2s;
         }
 
-        .open-only-toggle input:checked + .toggle-slider {
-            background: var(--success);
-            border-color: var(--success);
+        .toggle input:checked + .toggle-track { background: var(--success); }
+
+        .toggle-thumb {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .open-only-toggle input:checked + .toggle-slider::after {
-            background: #fff;
-            transform: translateX(20px);
-        }
+        .toggle input:checked ~ .toggle-thumb { transform: translateX(22px); }
 
         .toggle-label {
             font-size: 14px;
-            color: var(--text-primary);
+            font-weight: 500;
+            color: var(--text-dark);
         }
 
         .search-btn {
-            background: var(--success);
-            color: #000;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
             border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: var(--radius-sm);
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+            margin-left: auto;
         }
 
-        .search-btn:hover {
-            filter: brightness(1.1);
+        .search-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .search-btn:active { transform: translateY(0); }
+        .search-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Results Panel */
+        .results-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
         }
 
-        .search-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
         .results-count {
-            margin-left: auto;
             font-size: 14px;
-            color: var(--text-muted);
+            color: var(--text-medium);
+            background: var(--bg-light);
+            padding: 6px 14px;
+            border-radius: 50px;
         }
 
         .map-results-container {
-            flex: 1;
             display: flex;
-            overflow: hidden;
+            gap: 20px;
+            flex: 1;
+            min-height: 500px;
         }
 
+        /* Map */
         .map-container {
             flex: 1;
-            min-height: 400px;
-            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
             position: relative;
+            min-height: 400px;
         }
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+        #map { width: 100%; height: 100%; }
 
         .map-placeholder {
             position: absolute;
             inset: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
+            color: var(--text-medium);
         }
 
-        .map-placeholder-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+        .map-placeholder-icon { font-size: 72px; margin-bottom: 16px; }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
         }
 
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Restaurant List */
         .restaurants-list {
-            width: 400px;
-            min-width: 400px;
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border-color);
+            width: 420px;
+            min-width: 420px;
+            max-height: 700px;
             overflow-y: auto;
-            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 8px;
         }
 
         .restaurant-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
             cursor: pointer;
             transition: all 0.2s;
+            border: 2px solid transparent;
         }
 
         .restaurant-card:hover {
-            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .restaurant-card.selected {
-            border-color: var(--accent);
-            background: rgba(88, 166, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .restaurant-content {
+            padding: 20px;
         }
 
         .restaurant-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .restaurant-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            flex: 1;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.3;
         }
 
         .restaurant-distance {
-            font-size: 14px;
-            color: var(--accent);
-            font-weight: 500;
+            background: linear-gradient(135deg, var(--secondary) 0%, #00a0dc 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
             white-space: nowrap;
             margin-left: 12px;
         }
@@ -510,8 +558,8 @@
         .restaurant-rating {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .stars {
@@ -519,292 +567,145 @@
             gap: 2px;
         }
 
-        .star {
-            color: var(--star);
-            font-size: 14px;
-        }
-
-        .star.empty {
-            color: var(--border-color);
-        }
+        .star { font-size: 18px; color: var(--star); }
+        .star.empty { color: #ddd; }
 
         .rating-text {
             font-size: 14px;
-            color: var(--text-muted);
+            color: var(--text-medium);
+        }
+
+        .rating-number {
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
         .restaurant-meta {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             flex-wrap: wrap;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .meta-item {
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: 14px;
+            color: var(--text-medium);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .meta-item.open {
+        .meta-item.open { color: var(--success); font-weight: 600; }
+        .meta-item.closed { color: var(--primary); font-weight: 600; }
+
+        .price-tag {
+            font-weight: 600;
             color: var(--success);
-        }
-
-        .meta-item.closed {
-            color: var(--error);
         }
 
         .matched-foods {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
+            margin-bottom: 16px;
         }
 
-        .matched-food-tag {
-            background: rgba(88, 166, 255, 0.15);
-            color: var(--accent);
-            padding: 4px 8px;
-            border-radius: 4px;
+        .food-tag {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #b7472a;
+            padding: 6px 12px;
+            border-radius: 50px;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .restaurant-actions {
-            margin-top: 12px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
         }
 
-        .directions-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
+        .action-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
         }
 
-        .directions-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+        .action-btn.primary {
+            background: var(--primary);
+            color: white;
         }
+
+        .action-btn.primary:hover { background: var(--primary-dark); }
+
+        .action-btn.secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+        }
+
+        .action-btn.secondary:hover { background: #e8e8e8; }
+
+        .action-btn.outline {
+            background: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .action-btn.outline:hover { background: var(--secondary); color: white; }
 
         .empty-results {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
+            padding: 60px 30px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
 
-        .empty-results-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-        }
-
-        /* API Key Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .modal h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-
-        .modal p {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .modal-input {
-            width: 100%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
-            color: var(--text-primary);
-            font-size: 14px;
-            margin-bottom: 16px;
-            outline: none;
-        }
-
-        .modal-input:focus {
-            border-color: var(--accent);
-        }
-
-        .modal-error {
-            color: var(--error);
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-
-        .modal-btn {
-            width: 100%;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .modal-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Loading Spinner */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border-color);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(10, 14, 23, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            color: var(--text-muted);
-        }
+        .empty-results-icon { font-size: 80px; margin-bottom: 20px; }
+        .empty-results h3 { font-size: 20px; margin-bottom: 10px; color: var(--text-dark); }
+        .empty-results p { color: var(--text-medium); }
 
         /* Footer */
         .footer {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            color: var(--text-muted);
+            background: var(--text-dark);
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 14px;
         }
 
-        .api-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .api-status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-
-        .api-status-dot.error {
-            background: var(--error);
-        }
-
-        .change-key-btn {
-            background: none;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 13px;
-            text-decoration: underline;
-        }
+        .footer a { color: var(--primary-light); }
 
         /* Responsive */
         @media (max-width: 1200px) {
-            .restaurants-list {
-                width: 350px;
-                min-width: 350px;
-            }
+            .main-content { flex-direction: column; }
+            .foods-panel { width: 100%; min-width: 100%; flex-direction: row; gap: 20px; }
+            .foods-panel > * { flex: 1; }
+            .restaurants-list { width: 100%; min-width: 100%; max-height: none; }
+            .map-results-container { flex-direction: column; }
         }
 
-        @media (max-width: 1000px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .foods-panel {
-                width: 100%;
-                min-width: 100%;
-                max-height: 250px;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .map-results-container {
-                flex-direction: column;
-            }
-
-            .map-container {
-                min-height: 300px;
-            }
-
-            .restaurants-list {
-                width: 100%;
-                min-width: 100%;
-                max-height: 400px;
-                border-left: none;
-                border-top: 1px solid var(--border-color);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-
-            .controls-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .distance-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .results-count {
-                margin-left: 0;
-                text-align: center;
-            }
+        @media (max-width: 768px) {
+            .header { padding: 16px; }
+            .logo h1 { font-size: 22px; }
+            .main-content { padding: 16px; }
+            .foods-panel { flex-direction: column; }
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .search-btn { margin-left: 0; width: 100%; justify-content: center; }
+            .restaurant-actions { flex-direction: column; }
+            .action-btn { justify-content: center; }
         }
     </style>
 </head>
@@ -812,61 +713,48 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useRef } = React;
+        const { useState, useEffect, useRef } = React;
 
         // Constants
         const GOOGLE_API_KEY = 'AIzaSyDeTlwdCU0nEO9QTCN5vXzMuDMuhiIrnSU';
-
-        const STORAGE_KEYS = {
-            FAVORITES: 'foodfinder_favorite_foods'
-        };
-
-        const DISTANCE_OPTIONS = [5, 10, 15, 20, 25];
+        const STORAGE_KEYS = { FAVORITES: 'foodfinder_favorite_foods' };
+        const DISTANCE_OPTIONS = [5, 10, 15, 25];
         const MILES_TO_METERS = 1609.34;
 
         // Utility Functions
         const generateId = () => Math.random().toString(36).substr(2, 9);
 
         const calculateDistance = (lat1, lng1, lat2, lng2) => {
-            const R = 3959; // Earth's radius in miles
+            const R = 3959;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                 Math.sin(dLng / 2) * Math.sin(dLng / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         };
 
-        const formatDistance = (miles) => {
-            if (miles < 0.1) return '< 0.1 mi';
-            return `${miles.toFixed(1)} mi`;
-        };
+        const formatDistance = (miles) => miles < 0.1 ? '< 0.1 mi' : `${miles.toFixed(1)} mi`;
 
         const getPriceLevel = (level) => {
-            if (level === undefined || level === null) return 'N/A';
+            if (level === undefined || level === null) return null;
             return '$'.repeat(level + 1);
         };
 
         // Food Item Component
-        const FoodItem = ({ food, index, onDelete, onDragStart, onDragOver, onDrop, isDragging, isDragOver }) => {
-            return (
-                <div
-                    className={`food-item ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, index)}
-                    onDragOver={(e) => onDragOver(e, index)}
-                    onDrop={(e) => onDrop(e, index)}
-                    onDragEnd={(e) => e.target.classList.remove('dragging')}
-                >
-                    <div className="food-priority">{index + 1}</div>
-                    <span className="food-name">{food.name}</span>
-                    <button className="food-delete" onClick={() => onDelete(food.id)} title="Remove">
-                        ×
-                    </button>
-                </div>
-            );
-        };
+        const FoodItem = ({ food, index, onDelete, onDragStart, onDragOver, onDrop, isDragging, isDragOver }) => (
+            <div
+                className={`food-item ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                draggable
+                onDragStart={(e) => onDragStart(e, index)}
+                onDragOver={(e) => onDragOver(e, index)}
+                onDrop={(e) => onDrop(e, index)}
+            >
+                <div className="food-priority">{index + 1}</div>
+                <span className="food-name">{food.name}</span>
+                <button className="food-delete" onClick={() => onDelete(food.id)}>×</button>
+            </div>
+        );
 
         // Foods Panel Component
         const FoodsPanel = ({ foods, onAddFood, onDeleteFood, onReorderFoods }) => {
@@ -882,47 +770,27 @@
                 }
             };
 
-            const handleDragStart = (e, index) => {
-                setDragIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
-            };
-
-            const handleDragOver = (e, index) => {
-                e.preventDefault();
-                setDragOverIndex(index);
-            };
-
-            const handleDrop = (e, dropIndex) => {
-                e.preventDefault();
-                if (dragIndex !== null && dragIndex !== dropIndex) {
-                    onReorderFoods(dragIndex, dropIndex);
-                }
-                setDragIndex(null);
-                setDragOverIndex(null);
-            };
-
             return (
-                <div className="foods-panel">
+                <div className="panel-card">
                     <div className="panel-header">
-                        <div className="panel-title">Favorite Foods</div>
-                        <form className="add-food-form" onSubmit={handleSubmit}>
-                            <input
-                                type="text"
-                                className="add-food-input"
-                                placeholder="Add a food (e.g., Pizza)"
-                                value={newFood}
-                                onChange={(e) => setNewFood(e.target.value)}
-                            />
-                            <button type="submit" className="add-food-btn" disabled={!newFood.trim()}>
-                                Add
-                            </button>
-                        </form>
+                        <div className="panel-title">What are you craving?</div>
+                        <div className="panel-subtitle">Add foods to find matching restaurants</div>
                     </div>
+                    <form className="add-food-form" onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            className="add-food-input"
+                            placeholder="Pizza, Tacos, Sushi..."
+                            value={newFood}
+                            onChange={(e) => setNewFood(e.target.value)}
+                        />
+                        <button type="submit" className="add-food-btn" disabled={!newFood.trim()}>Add</button>
+                    </form>
                     <div className="foods-list">
                         {foods.length === 0 ? (
                             <div className="empty-foods">
                                 <div className="empty-foods-icon">🍕</div>
-                                <p>Add your favorite foods to find nearby restaurants!</p>
+                                <p>Add your favorite foods to get started!</p>
                             </div>
                         ) : (
                             foods.map((food, index) => (
@@ -931,9 +799,14 @@
                                     food={food}
                                     index={index}
                                     onDelete={onDeleteFood}
-                                    onDragStart={handleDragStart}
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleDrop}
+                                    onDragStart={(e, i) => setDragIndex(i)}
+                                    onDragOver={(e, i) => { e.preventDefault(); setDragOverIndex(i); }}
+                                    onDrop={(e, i) => {
+                                        e.preventDefault();
+                                        if (dragIndex !== null && dragIndex !== i) onReorderFoods(dragIndex, i);
+                                        setDragIndex(null);
+                                        setDragOverIndex(null);
+                                    }}
                                     isDragging={dragIndex === index}
                                     isDragOver={dragOverIndex === index}
                                 />
@@ -947,66 +820,72 @@
         // Star Rating Component
         const StarRating = ({ rating }) => {
             const stars = [];
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 >= 0.5;
-
             for (let i = 0; i < 5; i++) {
-                if (i < fullStars) {
-                    stars.push(<span key={i} className="star">★</span>);
-                } else if (i === fullStars && hasHalfStar) {
-                    stars.push(<span key={i} className="star">★</span>);
-                } else {
-                    stars.push(<span key={i} className="star empty">★</span>);
-                }
+                stars.push(
+                    <span key={i} className={`star ${i < Math.round(rating) ? '' : 'empty'}`}>★</span>
+                );
             }
-
             return <div className="stars">{stars}</div>;
         };
 
         // Restaurant Card Component
         const RestaurantCard = ({ restaurant, isSelected, onClick, userLocation }) => {
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${restaurant.location.lat},${restaurant.location.lng}&destination_place_id=${restaurant.placeId}`;
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.name)}&destination_place_id=${restaurant.placeId}`;
+            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || ''))}`;
+            const menuSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' menu')}`;
+            const yelpSearchUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name)}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
 
             return (
-                <div
-                    className={`restaurant-card ${isSelected ? 'selected' : ''}`}
-                    onClick={onClick}
-                >
-                    <div className="restaurant-header">
-                        <div className="restaurant-name">{restaurant.name}</div>
-                        <div className="restaurant-distance">{formatDistance(restaurant.distance)}</div>
-                    </div>
-                    <div className="restaurant-rating">
-                        <StarRating rating={restaurant.rating || 0} />
-                        <span className="rating-text">
-                            {restaurant.rating?.toFixed(1) || 'N/A'} ({restaurant.reviewCount || 0} reviews)
-                        </span>
-                    </div>
-                    <div className="restaurant-meta">
-                        <span className="meta-item">{getPriceLevel(restaurant.priceLevel)}</span>
-                        {restaurant.isOpen !== undefined && (
-                            <span className={`meta-item ${restaurant.isOpen ? 'open' : 'closed'}`}>
-                                {restaurant.isOpen ? 'Open now' : 'Closed'}
-                            </span>
-                        )}
-                    </div>
-                    {restaurant.matchedFoods && restaurant.matchedFoods.length > 0 && (
-                        <div className="matched-foods">
-                            {restaurant.matchedFoods.map((food, i) => (
-                                <span key={i} className="matched-food-tag">{food}</span>
-                            ))}
+                <div className={`restaurant-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
+                    <div className="restaurant-content">
+                        <div className="restaurant-header">
+                            <div className="restaurant-name">{restaurant.name}</div>
+                            <div className="restaurant-distance">{formatDistance(restaurant.distance)}</div>
                         </div>
-                    )}
-                    <div className="restaurant-actions">
-                        <a
-                            href={directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="directions-btn"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            📍 Get Directions
-                        </a>
+
+                        <div className="restaurant-rating">
+                            <StarRating rating={restaurant.rating || 0} />
+                            <span className="rating-text">
+                                <span className="rating-number">{restaurant.rating?.toFixed(1) || 'N/A'}</span>
+                                {' '}({restaurant.reviewCount || 0} reviews)
+                            </span>
+                        </div>
+
+                        <div className="restaurant-meta">
+                            {getPriceLevel(restaurant.priceLevel) && (
+                                <span className="meta-item">
+                                    <span className="price-tag">{getPriceLevel(restaurant.priceLevel)}</span>
+                                </span>
+                            )}
+                            {restaurant.isOpen !== undefined && (
+                                <span className={`meta-item ${restaurant.isOpen ? 'open' : 'closed'}`}>
+                                    {restaurant.isOpen ? '● Open Now' : '● Closed'}
+                                </span>
+                            )}
+                            {restaurant.address && (
+                                <span className="meta-item">📍 {restaurant.address}</span>
+                            )}
+                        </div>
+
+                        {restaurant.matchedFoods?.length > 0 && (
+                            <div className="matched-foods">
+                                {restaurant.matchedFoods.map((food, i) => (
+                                    <span key={i} className="food-tag">{food}</span>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="restaurant-actions">
+                            <a href={yelpSearchUrl} target="_blank" rel="noopener noreferrer" className="action-btn primary" onClick={(e) => e.stopPropagation()}>
+                                View on Yelp
+                            </a>
+                            <a href={menuSearchUrl} target="_blank" rel="noopener noreferrer" className="action-btn secondary" onClick={(e) => e.stopPropagation()}>
+                                🍽️ Menu
+                            </a>
+                            <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="action-btn outline" onClick={(e) => e.stopPropagation()}>
+                                📍 Directions
+                            </a>
+                        </div>
                     </div>
                 </div>
             );
@@ -1014,19 +893,14 @@
 
         // Main App Component
         const App = () => {
-            // State
             const [apiReady, setApiReady] = useState(false);
-            const [apiError, setApiError] = useState('');
-
             const [foods, setFoods] = useState(() => {
                 const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
                 return saved ? JSON.parse(saved) : [];
             });
-
             const [userLocation, setUserLocation] = useState(null);
             const [locationError, setLocationError] = useState('');
             const [locationLoading, setLocationLoading] = useState(true);
-
             const [distance, setDistance] = useState(10);
             const [openOnly, setOpenOnly] = useState(false);
             const [restaurants, setRestaurants] = useState([]);
@@ -1036,181 +910,113 @@
             const mapRef = useRef(null);
             const mapInstanceRef = useRef(null);
             const markersRef = useRef([]);
-            const userMarkerRef = useRef(null);
-            const radiusCircleRef = useRef(null);
             const placesServiceRef = useRef(null);
 
-            // Save foods to localStorage
             useEffect(() => {
                 localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(foods));
             }, [foods]);
 
-            // Load Google Maps API
             useEffect(() => {
-                const loadGoogleMaps = () => {
-                    if (window.google && window.google.maps) {
-                        setApiReady(true);
-                        return;
-                    }
-
-                    const script = document.createElement('script');
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
-                    script.async = true;
-                    script.defer = true;
-
-                    script.onload = () => {
-                        setApiReady(true);
-                        setApiError('');
-                    };
-
-                    script.onerror = () => {
-                        setApiError('Failed to load Google Maps API.');
-                    };
-
-                    document.head.appendChild(script);
-                };
-
-                loadGoogleMaps();
+                if (window.google?.maps) { setApiReady(true); return; }
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
+                script.async = true;
+                script.onload = () => setApiReady(true);
+                document.head.appendChild(script);
             }, []);
 
-            // Get user location
             useEffect(() => {
                 if (!navigator.geolocation) {
-                    setLocationError('Geolocation is not supported by your browser');
+                    setLocationError('Geolocation not supported');
                     setLocationLoading(false);
                     return;
                 }
-
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        setUserLocation({
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        });
+                    (pos) => {
+                        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
                         setLocationLoading(false);
                     },
-                    (error) => {
-                        setLocationError('Unable to get your location. Please enable location access.');
+                    () => {
+                        setLocationError('Location access denied');
                         setLocationLoading(false);
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
             }, []);
 
-            // Initialize map
             useEffect(() => {
                 if (!apiReady || !userLocation || !mapRef.current || mapInstanceRef.current) return;
 
                 const map = new google.maps.Map(mapRef.current, {
                     center: userLocation,
-                    zoom: 12,
+                    zoom: 13,
                     styles: [
-                        { elementType: 'geometry', stylers: [{ color: '#0d1117' }] },
-                        { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1117' }] },
-                        { elementType: 'labels.text.fill', stylers: [{ color: '#8b949e' }] },
-                        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1c2333' }] },
-                        { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#8b949e' }] },
-                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a0e17' }] },
                         { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
                         { featureType: 'transit', stylers: [{ visibility: 'off' }] }
-                    ]
+                    ],
+                    mapTypeControl: false,
+                    fullscreenControl: false
                 });
 
                 mapInstanceRef.current = map;
                 placesServiceRef.current = new google.maps.places.PlacesService(map);
 
-                // Add user location marker
-                userMarkerRef.current = new google.maps.Marker({
+                new google.maps.Marker({
                     position: userLocation,
-                    map: map,
+                    map,
                     icon: {
                         path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: '#58a6ff',
+                        scale: 12,
+                        fillColor: '#d32323',
                         fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2
+                        strokeColor: '#fff',
+                        strokeWeight: 3
                     },
-                    title: 'Your Location'
+                    title: 'You'
                 });
-
-                // Add radius circle
-                radiusCircleRef.current = new google.maps.Circle({
-                    map: map,
-                    center: userLocation,
-                    radius: distance * MILES_TO_METERS,
-                    fillColor: '#58a6ff',
-                    fillOpacity: 0.1,
-                    strokeColor: '#58a6ff',
-                    strokeOpacity: 0.3,
-                    strokeWeight: 1
-                });
-
             }, [apiReady, userLocation]);
 
-            // Update radius circle when distance changes
-            useEffect(() => {
-                if (radiusCircleRef.current) {
-                    radiusCircleRef.current.setRadius(distance * MILES_TO_METERS);
-                }
-            }, [distance]);
-
-            // Food management functions
             const addFood = (name) => {
-                const existingFood = foods.find(f => f.name.toLowerCase() === name.toLowerCase());
-                if (existingFood) return;
-
-                setFoods(prev => [...prev, {
-                    id: generateId(),
-                    name: name,
-                    priority: prev.length + 1
-                }]);
+                if (foods.find(f => f.name.toLowerCase() === name.toLowerCase())) return;
+                setFoods(prev => [...prev, { id: generateId(), name }]);
             };
 
-            const deleteFood = (id) => {
-                setFoods(prev => prev.filter(f => f.id !== id));
-            };
+            const deleteFood = (id) => setFoods(prev => prev.filter(f => f.id !== id));
 
-            const reorderFoods = (fromIndex, toIndex) => {
+            const reorderFoods = (from, to) => {
                 setFoods(prev => {
-                    const newFoods = [...prev];
-                    const [moved] = newFoods.splice(fromIndex, 1);
-                    newFoods.splice(toIndex, 0, moved);
-                    return newFoods;
+                    const arr = [...prev];
+                    const [moved] = arr.splice(from, 1);
+                    arr.splice(to, 0, moved);
+                    return arr;
                 });
             };
 
-            // Search restaurants
             const searchRestaurants = async () => {
-                if (!placesServiceRef.current || !userLocation || foods.length === 0) return;
+                if (!placesServiceRef.current || !userLocation || !foods.length) return;
 
                 setSearchLoading(true);
                 setRestaurants([]);
-
-                // Clear existing markers
-                markersRef.current.forEach(marker => marker.setMap(null));
+                markersRef.current.forEach(m => m.setMap(null));
                 markersRef.current = [];
 
                 const allResults = new Map();
 
-                const searchPromises = foods.map((food, foodIndex) => {
-                    return new Promise((resolve) => {
-                        const request = {
+                await Promise.all(foods.map(food =>
+                    new Promise(resolve => {
+                        placesServiceRef.current.nearbySearch({
                             location: userLocation,
                             radius: distance * MILES_TO_METERS,
                             type: 'restaurant',
                             keyword: food.name
-                        };
-
-                        placesServiceRef.current.nearbySearch(request, (results, status) => {
+                        }, (results, status) => {
                             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                                 results.forEach(place => {
-                                    const placeDistance = calculateDistance(
+                                    const dist = calculateDistance(
                                         userLocation.lat, userLocation.lng,
                                         place.geometry.location.lat(), place.geometry.location.lng()
                                     );
-
-                                    if (placeDistance <= distance) {
+                                    if (dist <= distance) {
                                         if (allResults.has(place.place_id)) {
                                             const existing = allResults.get(place.place_id);
                                             if (!existing.matchedFoods.includes(food.name)) {
@@ -1222,12 +1028,9 @@
                                                 name: place.name,
                                                 rating: place.rating,
                                                 reviewCount: place.user_ratings_total,
-                                                distance: placeDistance,
+                                                distance: dist,
                                                 priceLevel: place.price_level,
-                                                location: {
-                                                    lat: place.geometry.location.lat(),
-                                                    lng: place.geometry.location.lng()
-                                                },
+                                                location: { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
                                                 matchedFoods: [food.name],
                                                 address: place.vicinity,
                                                 isOpen: place.opening_hours?.isOpen?.()
@@ -1238,144 +1041,132 @@
                             }
                             resolve();
                         });
-                    });
-                });
+                    })
+                ));
 
-                await Promise.all(searchPromises);
+                const sorted = Array.from(allResults.values()).sort((a, b) =>
+                    a.distance !== b.distance ? a.distance - b.distance : (b.rating || 0) - (a.rating || 0)
+                );
 
-                // Sort by distance (primary), then by rating (secondary)
-                const sortedResults = Array.from(allResults.values()).sort((a, b) => {
-                    if (a.distance !== b.distance) return a.distance - b.distance;
-                    return (b.rating || 0) - (a.rating || 0);
-                });
+                setRestaurants(sorted);
 
-                setRestaurants(sortedResults);
-
-                // Add markers for restaurants
-                sortedResults.forEach((restaurant, index) => {
+                sorted.forEach((r, i) => {
                     const marker = new google.maps.Marker({
-                        position: restaurant.location,
+                        position: r.location,
                         map: mapInstanceRef.current,
-                        title: restaurant.name,
-                        label: {
-                            text: (index + 1).toString(),
-                            color: '#ffffff',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                        },
+                        label: { text: String(i + 1), color: '#fff', fontWeight: 'bold', fontSize: '12px' },
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: 15,
-                            fillColor: '#4ade80',
+                            scale: 18,
+                            fillColor: '#d32323',
                             fillOpacity: 1,
-                            strokeColor: '#ffffff',
+                            strokeColor: '#fff',
                             strokeWeight: 2
                         }
                     });
-
                     marker.addListener('click', () => {
-                        setSelectedRestaurant(restaurant.placeId);
-                        // Scroll to card
-                        const card = document.querySelector(`[data-place-id="${restaurant.placeId}"]`);
-                        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setSelectedRestaurant(r.placeId);
+                        document.querySelector(`[data-place-id="${r.placeId}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     });
-
                     markersRef.current.push(marker);
                 });
 
-                // Fit bounds to show all markers
-                if (sortedResults.length > 0) {
+                if (sorted.length) {
                     const bounds = new google.maps.LatLngBounds();
                     bounds.extend(userLocation);
-                    sortedResults.forEach(r => bounds.extend(r.location));
+                    sorted.forEach(r => bounds.extend(r.location));
                     mapInstanceRef.current.fitBounds(bounds, 50);
                 }
 
                 setSearchLoading(false);
             };
 
-            // Handle restaurant card click
-            const handleRestaurantClick = (placeId) => {
+            const handleCardClick = (placeId) => {
                 setSelectedRestaurant(placeId);
-                const restaurant = restaurants.find(r => r.placeId === placeId);
-                if (restaurant && mapInstanceRef.current) {
-                    mapInstanceRef.current.panTo(restaurant.location);
-                    mapInstanceRef.current.setZoom(15);
+                const r = restaurants.find(r => r.placeId === placeId);
+                if (r && mapInstanceRef.current) {
+                    mapInstanceRef.current.panTo(r.location);
+                    mapInstanceRef.current.setZoom(16);
                 }
             };
 
-            // Filter restaurants based on openOnly toggle
-            const filteredRestaurants = openOnly
-                ? restaurants.filter(r => r.isOpen === true)
-                : restaurants;
-
-            const locationStatus = locationLoading ? 'loading' : (locationError ? 'error' : 'success');
+            const filteredRestaurants = openOnly ? restaurants.filter(r => r.isOpen) : restaurants;
 
             return (
                 <div className="app-container">
                     <header className="header">
-                        <h1><span>🍔</span> Food Finder</h1>
-                        <div className="location-status">
-                            <div className={`location-dot ${locationStatus === 'error' ? 'error' : ''} ${locationStatus === 'loading' ? 'loading' : ''}`}></div>
-                            <span>
-                                {locationLoading ? 'Getting location...' :
-                                 locationError ? locationError :
-                                 `Location: ${userLocation?.lat.toFixed(4)}, ${userLocation?.lng.toFixed(4)}`}
-                            </span>
+                        <div className="header-content">
+                            <div className="logo">
+                                <span className="logo-icon">🍔</span>
+                                <h1>Food Finder</h1>
+                            </div>
+                            <div className="location-badge">
+                                <div className={`location-dot ${locationError ? 'error' : ''} ${locationLoading ? 'loading' : ''}`} />
+                                <span>
+                                    {locationLoading ? 'Finding you...' :
+                                     locationError ? locationError :
+                                     'Location found'}
+                                </span>
+                            </div>
                         </div>
                     </header>
 
                     <main className="main-content">
-                        <FoodsPanel
-                            foods={foods}
-                            onAddFood={addFood}
-                            onDeleteFood={deleteFood}
-                            onReorderFoods={reorderFoods}
-                        />
+                        <div className="foods-panel">
+                            <FoodsPanel
+                                foods={foods}
+                                onAddFood={addFood}
+                                onDeleteFood={deleteFood}
+                                onReorderFoods={reorderFoods}
+                            />
+
+                            <div className="controls-card">
+                                <div className="controls-row">
+                                    <div className="control-group">
+                                        <span className="control-label">Distance</span>
+                                        <div className="distance-buttons">
+                                            {DISTANCE_OPTIONS.map(d => (
+                                                <button
+                                                    key={d}
+                                                    className={`distance-btn ${distance === d ? 'active' : ''}`}
+                                                    onClick={() => setDistance(d)}
+                                                >
+                                                    {d} mi
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="control-group">
+                                        <span className="control-label">Filter</span>
+                                        <div className="toggle-container">
+                                            <label className="toggle">
+                                                <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} />
+                                                <div className="toggle-track" />
+                                                <div className="toggle-thumb" />
+                                            </label>
+                                            <span className="toggle-label">Open Now</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className="search-btn"
+                                        onClick={searchRestaurants}
+                                        disabled={!userLocation || !foods.length || searchLoading}
+                                    >
+                                        {searchLoading ? 'Searching...' : '🔍 Find Food'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
                         <div className="results-panel">
-                            <div className="controls-bar">
-                                <div className="distance-selector">
-                                    <span className="distance-label">Search radius:</span>
-                                    <div className="distance-buttons">
-                                        {DISTANCE_OPTIONS.map(d => (
-                                            <button
-                                                key={d}
-                                                className={`distance-btn ${distance === d ? 'active' : ''}`}
-                                                onClick={() => setDistance(d)}
-                                            >
-                                                {d} mi
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <label className="open-only-toggle">
-                                    <input
-                                        type="checkbox"
-                                        checked={openOnly}
-                                        onChange={(e) => setOpenOnly(e.target.checked)}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                    <span className="toggle-label">Open now</span>
-                                </label>
-                                <button
-                                    className="search-btn"
-                                    onClick={searchRestaurants}
-                                    disabled={!userLocation || foods.length === 0 || searchLoading}
-                                >
-                                    {searchLoading ? (
-                                        <>
-                                            <span className="loading-spinner"></span>
-                                            Searching...
-                                        </>
-                                    ) : (
-                                        <>🔍 Find Restaurants</>
-                                    )}
-                                </button>
+                            <div className="results-header">
+                                <h2 className="results-title">Nearby Restaurants</h2>
                                 {filteredRestaurants.length > 0 && (
                                     <span className="results-count">
-                                        {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} found
-                                        {openOnly && restaurants.length !== filteredRestaurants.length && ` (${restaurants.length} total)`}
+                                        {filteredRestaurants.length} found
+                                        {openOnly && restaurants.length !== filteredRestaurants.length && ` of ${restaurants.length}`}
                                     </span>
                                 )}
                             </div>
@@ -1384,16 +1175,16 @@
                                 <div className="map-container">
                                     {!userLocation ? (
                                         <div className="map-placeholder">
-                                            <div className="map-placeholder-icon">🗺️</div>
-                                            <p>{locationLoading ? 'Getting your location...' : 'Enable location to see the map'}</p>
+                                            <div className="map-placeholder-icon">📍</div>
+                                            <p>{locationLoading ? 'Getting your location...' : 'Enable location to see map'}</p>
                                         </div>
                                     ) : (
-                                        <div id="map" ref={mapRef}></div>
+                                        <div id="map" ref={mapRef} />
                                     )}
                                     {searchLoading && (
                                         <div className="loading-overlay">
-                                            <span className="loading-spinner" style={{width: 40, height: 40}}></span>
-                                            <span>Searching for restaurants...</span>
+                                            <div className="loading-spinner" />
+                                            <span>Finding delicious places...</span>
                                         </div>
                                     )}
                                 </div>
@@ -1402,12 +1193,15 @@
                                     {filteredRestaurants.length === 0 ? (
                                         <div className="empty-results">
                                             <div className="empty-results-icon">🍽️</div>
+                                            <h3>
+                                                {foods.length === 0 ? 'Add some foods!' :
+                                                 restaurants.length === 0 ? 'Ready to search' :
+                                                 'No open restaurants'}
+                                            </h3>
                                             <p>
-                                                {foods.length === 0
-                                                    ? 'Add your favorite foods, then search!'
-                                                    : restaurants.length === 0
-                                                        ? 'Click "Find Restaurants" to discover nearby options'
-                                                        : 'No open restaurants found. Try disabling the "Open now" filter.'}
+                                                {foods.length === 0 ? 'Tell us what you\'re craving' :
+                                                 restaurants.length === 0 ? 'Click "Find Food" to discover nearby spots' :
+                                                 'Try turning off the "Open Now" filter'}
                                             </p>
                                         </div>
                                     ) : (
@@ -1416,7 +1210,7 @@
                                                 <RestaurantCard
                                                     restaurant={restaurant}
                                                     isSelected={selectedRestaurant === restaurant.placeId}
-                                                    onClick={() => handleRestaurantClick(restaurant.placeId)}
+                                                    onClick={() => handleCardClick(restaurant.placeId)}
                                                     userLocation={userLocation}
                                                 />
                                             </div>
@@ -1428,25 +1222,17 @@
                     </main>
 
                     <footer className="footer">
-                        <div className="api-status">
-                            <div className={`api-status-dot ${apiReady ? '' : 'error'}`}></div>
-                            <span>Google Maps API: {apiReady ? 'Connected' : apiError || 'Loading...'}</span>
-                        </div>
-                        <span>Food Finder</span>
+                        Made with ❤️ | Food Finder
                     </footer>
                 </div>
             );
         };
 
-        // Render the app
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 
-        // Register service worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker registered'))
-                    .catch(err => console.log('Service Worker registration failed:', err));
+                navigator.serviceWorker.register('sw.js').catch(() => {});
             });
         }
     </script>
