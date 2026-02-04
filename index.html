@@ -338,6 +338,55 @@
             border-color: var(--accent);
         }
 
+        .open-only-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .open-only-toggle input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s;
+        }
+
+        .open-only-toggle input:checked + .toggle-slider {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .open-only-toggle input:checked + .toggle-slider::after {
+            background: #fff;
+            transform: translateX(20px);
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
         .search-btn {
             background: var(--success);
             color: #000;
@@ -759,8 +808,9 @@
         const { useState, useEffect, useCallback, useRef } = React;
 
         // Constants
+        const GOOGLE_API_KEY = 'AIzaSyDeTlwdCU0nEO9QTCN5vXzMuDMuhiIrnSU';
+
         const STORAGE_KEYS = {
-            API_KEY: 'foodfinder_google_api_key',
             FAVORITES: 'foodfinder_favorite_foods'
         };
 
@@ -789,48 +839,6 @@
         const getPriceLevel = (level) => {
             if (level === undefined || level === null) return 'N/A';
             return '$'.repeat(level + 1);
-        };
-
-        // API Key Modal Component
-        const ApiKeyModal = ({ onSubmit, error, loading }) => {
-            const [apiKey, setApiKey] = useState('');
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (apiKey.trim()) {
-                    onSubmit(apiKey.trim());
-                }
-            };
-
-            return (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <h2>Google API Key Required</h2>
-                        <p>
-                            To use Food Finder, you need a Google API key with the following APIs enabled:
-                            <br /><br />
-                            • Maps JavaScript API<br />
-                            • Places API
-                            <br /><br />
-                            Get your API key from the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" style={{color: 'var(--accent)'}}>Google Cloud Console</a>.
-                        </p>
-                        <form onSubmit={handleSubmit}>
-                            <input
-                                type="text"
-                                className="modal-input"
-                                placeholder="Enter your Google API key"
-                                value={apiKey}
-                                onChange={(e) => setApiKey(e.target.value)}
-                                disabled={loading}
-                            />
-                            {error && <div className="modal-error">{error}</div>}
-                            <button type="submit" className="modal-btn" disabled={!apiKey.trim() || loading}>
-                                {loading ? 'Validating...' : 'Save & Continue'}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            );
         };
 
         // Food Item Component
@@ -1000,10 +1008,8 @@
         // Main App Component
         const App = () => {
             // State
-            const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEYS.API_KEY) || '');
-            const [apiKeyError, setApiKeyError] = useState('');
-            const [apiKeyLoading, setApiKeyLoading] = useState(false);
             const [apiReady, setApiReady] = useState(false);
+            const [apiError, setApiError] = useState('');
 
             const [foods, setFoods] = useState(() => {
                 const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
@@ -1015,6 +1021,7 @@
             const [locationLoading, setLocationLoading] = useState(true);
 
             const [distance, setDistance] = useState(10);
+            const [openOnly, setOpenOnly] = useState(false);
             const [restaurants, setRestaurants] = useState([]);
             const [selectedRestaurant, setSelectedRestaurant] = useState(null);
             const [searchLoading, setSearchLoading] = useState(false);
@@ -1033,8 +1040,6 @@
 
             // Load Google Maps API
             useEffect(() => {
-                if (!apiKey) return;
-
                 const loadGoogleMaps = () => {
                     if (window.google && window.google.maps) {
                         setApiReady(true);
@@ -1042,26 +1047,24 @@
                     }
 
                     const script = document.createElement('script');
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
                     script.async = true;
                     script.defer = true;
 
                     script.onload = () => {
                         setApiReady(true);
-                        setApiKeyError('');
-                        localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
+                        setApiError('');
                     };
 
                     script.onerror = () => {
-                        setApiKeyError('Failed to load Google Maps API. Please check your API key.');
-                        setApiKeyLoading(false);
+                        setApiError('Failed to load Google Maps API.');
                     };
 
                     document.head.appendChild(script);
                 };
 
                 loadGoogleMaps();
-            }, [apiKey]);
+            }, []);
 
             // Get user location
             useEffect(() => {
@@ -1144,12 +1147,6 @@
                     radiusCircleRef.current.setRadius(distance * MILES_TO_METERS);
                 }
             }, [distance]);
-
-            // Handle API key submission
-            const handleApiKeySubmit = (key) => {
-                setApiKeyLoading(true);
-                setApiKey(key);
-            };
 
             // Food management functions
             const addFood = (name) => {
@@ -1300,16 +1297,10 @@
                 }
             };
 
-            // Show API key modal if no key
-            if (!apiKey || (!apiReady && apiKey)) {
-                return (
-                    <ApiKeyModal
-                        onSubmit={handleApiKeySubmit}
-                        error={apiKeyError}
-                        loading={apiKeyLoading}
-                    />
-                );
-            }
+            // Filter restaurants based on openOnly toggle
+            const filteredRestaurants = openOnly
+                ? restaurants.filter(r => r.isOpen === true)
+                : restaurants;
 
             const locationStatus = locationLoading ? 'loading' : (locationError ? 'error' : 'success');
 
@@ -1351,6 +1342,15 @@
                                         ))}
                                     </div>
                                 </div>
+                                <label className="open-only-toggle">
+                                    <input
+                                        type="checkbox"
+                                        checked={openOnly}
+                                        onChange={(e) => setOpenOnly(e.target.checked)}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                    <span className="toggle-label">Open now</span>
+                                </label>
                                 <button
                                     className="search-btn"
                                     onClick={searchRestaurants}
@@ -1365,9 +1365,10 @@
                                         <>🔍 Find Restaurants</>
                                     )}
                                 </button>
-                                {restaurants.length > 0 && (
+                                {filteredRestaurants.length > 0 && (
                                     <span className="results-count">
-                                        {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} found
+                                        {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} found
+                                        {openOnly && restaurants.length !== filteredRestaurants.length && ` (${restaurants.length} total)`}
                                     </span>
                                 )}
                             </div>
@@ -1391,17 +1392,19 @@
                                 </div>
 
                                 <div className="restaurants-list">
-                                    {restaurants.length === 0 ? (
+                                    {filteredRestaurants.length === 0 ? (
                                         <div className="empty-results">
                                             <div className="empty-results-icon">🍽️</div>
                                             <p>
                                                 {foods.length === 0
                                                     ? 'Add your favorite foods, then search!'
-                                                    : 'Click "Find Restaurants" to discover nearby options'}
+                                                    : restaurants.length === 0
+                                                        ? 'Click "Find Restaurants" to discover nearby options'
+                                                        : 'No open restaurants found. Try disabling the "Open now" filter.'}
                                             </p>
                                         </div>
                                     ) : (
-                                        restaurants.map(restaurant => (
+                                        filteredRestaurants.map(restaurant => (
                                             <div key={restaurant.placeId} data-place-id={restaurant.placeId}>
                                                 <RestaurantCard
                                                     restaurant={restaurant}
@@ -1420,18 +1423,9 @@
                     <footer className="footer">
                         <div className="api-status">
                             <div className={`api-status-dot ${apiReady ? '' : 'error'}`}></div>
-                            <span>Google Maps API: {apiReady ? 'Connected' : 'Not connected'}</span>
+                            <span>Google Maps API: {apiReady ? 'Connected' : apiError || 'Loading...'}</span>
                         </div>
-                        <button
-                            className="change-key-btn"
-                            onClick={() => {
-                                localStorage.removeItem(STORAGE_KEYS.API_KEY);
-                                setApiKey('');
-                                setApiReady(false);
-                            }}
-                        >
-                            Change API Key
-                        </button>
+                        <span>Food Finder</span>
                     </footer>
                 </div>
             );
