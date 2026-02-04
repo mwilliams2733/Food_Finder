@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Finder - Find Nearby Restaurants</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #0d1117;
+            --bg-tertiary: #161b22;
+            --border-color: #1c2333;
+            --text-primary: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79b8ff;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --error: #f87171;
+            --star: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        #root {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            font-size: 28px;
+        }
+
+        .location-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .location-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .location-dot.error {
+            background: var(--error);
+        }
+
+        .location-dot.loading {
+            background: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Panel - Foods List */
+        .foods-panel {
+            width: 320px;
+            min-width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .add-food-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-food-input {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .add-food-input:focus {
+            border-color: var(--accent);
+        }
+
+        .add-food-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .add-food-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-food-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .add-food-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .foods-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .food-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .food-item:hover {
+            border-color: var(--accent);
+        }
+
+        .food-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .food-item.drag-over {
+            border-color: var(--accent);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .food-priority {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .food-name {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .food-delete {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .food-delete:hover {
+            color: var(--error);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .empty-foods {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-foods-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* Right Panel - Map and Results */
+        .results-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .distance-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .distance-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .distance-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .distance-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .distance-btn:first-child {
+            border-radius: 6px 0 0 6px;
+        }
+
+        .distance-btn:last-child {
+            border-radius: 0 6px 6px 0;
+        }
+
+        .distance-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .distance-btn:hover:not(.active) {
+            border-color: var(--accent);
+        }
+
+        .search-btn {
+            background: var(--success);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-count {
+            margin-left: auto;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .map-results-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .map-container {
+            flex: 1;
+            min-height: 400px;
+            background: var(--bg-tertiary);
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .map-placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .restaurants-list {
+            width: 400px;
+            min-width: 400px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .restaurant-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .restaurant-card:hover {
+            border-color: var(--accent);
+        }
+
+        .restaurant-card.selected {
+            border-color: var(--accent);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .restaurant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .restaurant-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .restaurant-distance {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+
+        .restaurant-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            color: var(--star);
+            font-size: 14px;
+        }
+
+        .star.empty {
+            color: var(--border-color);
+        }
+
+        .rating-text {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .restaurant-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .meta-item {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .meta-item.open {
+            color: var(--success);
+        }
+
+        .meta-item.closed {
+            color: var(--error);
+        }
+
+        .matched-foods {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .matched-food-tag {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .restaurant-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .directions-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .directions-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .empty-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-results-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        /* API Key Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent);
+        }
+
+        .modal-error {
+            color: var(--error);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 14, 23, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .api-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .api-status-dot.error {
+            background: var(--error);
+        }
+
+        .change-key-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .restaurants-list {
+                width: 350px;
+                min-width: 350px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .foods-panel {
+                width: 100%;
+                min-width: 100%;
+                max-height: 250px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .map-results-container {
+                flex-direction: column;
+            }
+
+            .map-container {
+                min-height: 300px;
+            }
+
+            .restaurants-list {
+                width: 100%;
+                min-width: 100%;
+                max-height: 400px;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .distance-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .results-count {
+                margin-left: 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        // Constants
+        const STORAGE_KEYS = {
+            API_KEY: 'foodfinder_google_api_key',
+            FAVORITES: 'foodfinder_favorite_foods'
+        };
+
+        const DISTANCE_OPTIONS = [5, 10, 15, 20, 25];
+        const MILES_TO_METERS = 1609.34;
+
+        // Utility Functions
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        const calculateDistance = (lat1, lng1, lat2, lng2) => {
+            const R = 3959; // Earth's radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        };
+
+        const formatDistance = (miles) => {
+            if (miles < 0.1) return '< 0.1 mi';
+            return `${miles.toFixed(1)} mi`;
+        };
+
+        const getPriceLevel = (level) => {
+            if (level === undefined || level === null) return 'N/A';
+            return '$'.repeat(level + 1);
+        };
+
+        // API Key Modal Component
+        const ApiKeyModal = ({ onSubmit, error, loading }) => {
+            const [apiKey, setApiKey] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (apiKey.trim()) {
+                    onSubmit(apiKey.trim());
+                }
+            };
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2>Google API Key Required</h2>
+                        <p>
+                            To use Food Finder, you need a Google API key with the following APIs enabled:
+                            <br /><br />
+                            • Maps JavaScript API<br />
+                            • Places API
+                            <br /><br />
+                            Get your API key from the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" style={{color: 'var(--accent)'}}>Google Cloud Console</a>.
+                        </p>
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                type="text"
+                                className="modal-input"
+                                placeholder="Enter your Google API key"
+                                value={apiKey}
+                                onChange={(e) => setApiKey(e.target.value)}
+                                disabled={loading}
+                            />
+                            {error && <div className="modal-error">{error}</div>}
+                            <button type="submit" className="modal-btn" disabled={!apiKey.trim() || loading}>
+                                {loading ? 'Validating...' : 'Save & Continue'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Food Item Component
+        const FoodItem = ({ food, index, onDelete, onDragStart, onDragOver, onDrop, isDragging, isDragOver }) => {
+            return (
+                <div
+                    className={`food-item ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, index)}
+                    onDragOver={(e) => onDragOver(e, index)}
+                    onDrop={(e) => onDrop(e, index)}
+                    onDragEnd={(e) => e.target.classList.remove('dragging')}
+                >
+                    <div className="food-priority">{index + 1}</div>
+                    <span className="food-name">{food.name}</span>
+                    <button className="food-delete" onClick={() => onDelete(food.id)} title="Remove">
+                        ×
+                    </button>
+                </div>
+            );
+        };
+
+        // Foods Panel Component
+        const FoodsPanel = ({ foods, onAddFood, onDeleteFood, onReorderFoods }) => {
+            const [newFood, setNewFood] = useState('');
+            const [dragIndex, setDragIndex] = useState(null);
+            const [dragOverIndex, setDragOverIndex] = useState(null);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (newFood.trim()) {
+                    onAddFood(newFood.trim());
+                    setNewFood('');
+                }
+            };
+
+            const handleDragStart = (e, index) => {
+                setDragIndex(index);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragOver = (e, index) => {
+                e.preventDefault();
+                setDragOverIndex(index);
+            };
+
+            const handleDrop = (e, dropIndex) => {
+                e.preventDefault();
+                if (dragIndex !== null && dragIndex !== dropIndex) {
+                    onReorderFoods(dragIndex, dropIndex);
+                }
+                setDragIndex(null);
+                setDragOverIndex(null);
+            };
+
+            return (
+                <div className="foods-panel">
+                    <div className="panel-header">
+                        <div className="panel-title">Favorite Foods</div>
+                        <form className="add-food-form" onSubmit={handleSubmit}>
+                            <input
+                                type="text"
+                                className="add-food-input"
+                                placeholder="Add a food (e.g., Pizza)"
+                                value={newFood}
+                                onChange={(e) => setNewFood(e.target.value)}
+                            />
+                            <button type="submit" className="add-food-btn" disabled={!newFood.trim()}>
+                                Add
+                            </button>
+                        </form>
+                    </div>
+                    <div className="foods-list">
+                        {foods.length === 0 ? (
+                            <div className="empty-foods">
+                                <div className="empty-foods-icon">🍕</div>
+                                <p>Add your favorite foods to find nearby restaurants!</p>
+                            </div>
+                        ) : (
+                            foods.map((food, index) => (
+                                <FoodItem
+                                    key={food.id}
+                                    food={food}
+                                    index={index}
+                                    onDelete={onDeleteFood}
+                                    onDragStart={handleDragStart}
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                    isDragging={dragIndex === index}
+                                    isDragOver={dragOverIndex === index}
+                                />
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Star Rating Component
+        const StarRating = ({ rating }) => {
+            const stars = [];
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars.push(<span key={i} className="star">★</span>);
+                } else if (i === fullStars && hasHalfStar) {
+                    stars.push(<span key={i} className="star">★</span>);
+                } else {
+                    stars.push(<span key={i} className="star empty">★</span>);
+                }
+            }
+
+            return <div className="stars">{stars}</div>;
+        };
+
+        // Restaurant Card Component
+        const RestaurantCard = ({ restaurant, isSelected, onClick, userLocation }) => {
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${restaurant.location.lat},${restaurant.location.lng}&destination_place_id=${restaurant.placeId}`;
+
+            return (
+                <div
+                    className={`restaurant-card ${isSelected ? 'selected' : ''}`}
+                    onClick={onClick}
+                >
+                    <div className="restaurant-header">
+                        <div className="restaurant-name">{restaurant.name}</div>
+                        <div className="restaurant-distance">{formatDistance(restaurant.distance)}</div>
+                    </div>
+                    <div className="restaurant-rating">
+                        <StarRating rating={restaurant.rating || 0} />
+                        <span className="rating-text">
+                            {restaurant.rating?.toFixed(1) || 'N/A'} ({restaurant.reviewCount || 0} reviews)
+                        </span>
+                    </div>
+                    <div className="restaurant-meta">
+                        <span className="meta-item">{getPriceLevel(restaurant.priceLevel)}</span>
+                        {restaurant.isOpen !== undefined && (
+                            <span className={`meta-item ${restaurant.isOpen ? 'open' : 'closed'}`}>
+                                {restaurant.isOpen ? 'Open now' : 'Closed'}
+                            </span>
+                        )}
+                    </div>
+                    {restaurant.matchedFoods && restaurant.matchedFoods.length > 0 && (
+                        <div className="matched-foods">
+                            {restaurant.matchedFoods.map((food, i) => (
+                                <span key={i} className="matched-food-tag">{food}</span>
+                            ))}
+                        </div>
+                    )}
+                    <div className="restaurant-actions">
+                        <a
+                            href={directionsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="directions-btn"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            📍 Get Directions
+                        </a>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            // State
+            const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEYS.API_KEY) || '');
+            const [apiKeyError, setApiKeyError] = useState('');
+            const [apiKeyLoading, setApiKeyLoading] = useState(false);
+            const [apiReady, setApiReady] = useState(false);
+
+            const [foods, setFoods] = useState(() => {
+                const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [userLocation, setUserLocation] = useState(null);
+            const [locationError, setLocationError] = useState('');
+            const [locationLoading, setLocationLoading] = useState(true);
+
+            const [distance, setDistance] = useState(10);
+            const [restaurants, setRestaurants] = useState([]);
+            const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+            const [searchLoading, setSearchLoading] = useState(false);
+
+            const mapRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            const markersRef = useRef([]);
+            const userMarkerRef = useRef(null);
+            const radiusCircleRef = useRef(null);
+            const placesServiceRef = useRef(null);
+
+            // Save foods to localStorage
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(foods));
+            }, [foods]);
+
+            // Load Google Maps API
+            useEffect(() => {
+                if (!apiKey) return;
+
+                const loadGoogleMaps = () => {
+                    if (window.google && window.google.maps) {
+                        setApiReady(true);
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                    script.async = true;
+                    script.defer = true;
+
+                    script.onload = () => {
+                        setApiReady(true);
+                        setApiKeyError('');
+                        localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
+                    };
+
+                    script.onerror = () => {
+                        setApiKeyError('Failed to load Google Maps API. Please check your API key.');
+                        setApiKeyLoading(false);
+                    };
+
+                    document.head.appendChild(script);
+                };
+
+                loadGoogleMaps();
+            }, [apiKey]);
+
+            // Get user location
+            useEffect(() => {
+                if (!navigator.geolocation) {
+                    setLocationError('Geolocation is not supported by your browser');
+                    setLocationLoading(false);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setUserLocation({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        });
+                        setLocationLoading(false);
+                    },
+                    (error) => {
+                        setLocationError('Unable to get your location. Please enable location access.');
+                        setLocationLoading(false);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            }, []);
+
+            // Initialize map
+            useEffect(() => {
+                if (!apiReady || !userLocation || !mapRef.current || mapInstanceRef.current) return;
+
+                const map = new google.maps.Map(mapRef.current, {
+                    center: userLocation,
+                    zoom: 12,
+                    styles: [
+                        { elementType: 'geometry', stylers: [{ color: '#0d1117' }] },
+                        { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1117' }] },
+                        { elementType: 'labels.text.fill', stylers: [{ color: '#8b949e' }] },
+                        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1c2333' }] },
+                        { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#8b949e' }] },
+                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a0e17' }] },
+                        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'transit', stylers: [{ visibility: 'off' }] }
+                    ]
+                });
+
+                mapInstanceRef.current = map;
+                placesServiceRef.current = new google.maps.places.PlacesService(map);
+
+                // Add user location marker
+                userMarkerRef.current = new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: '#58a6ff',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2
+                    },
+                    title: 'Your Location'
+                });
+
+                // Add radius circle
+                radiusCircleRef.current = new google.maps.Circle({
+                    map: map,
+                    center: userLocation,
+                    radius: distance * MILES_TO_METERS,
+                    fillColor: '#58a6ff',
+                    fillOpacity: 0.1,
+                    strokeColor: '#58a6ff',
+                    strokeOpacity: 0.3,
+                    strokeWeight: 1
+                });
+
+            }, [apiReady, userLocation]);
+
+            // Update radius circle when distance changes
+            useEffect(() => {
+                if (radiusCircleRef.current) {
+                    radiusCircleRef.current.setRadius(distance * MILES_TO_METERS);
+                }
+            }, [distance]);
+
+            // Handle API key submission
+            const handleApiKeySubmit = (key) => {
+                setApiKeyLoading(true);
+                setApiKey(key);
+            };
+
+            // Food management functions
+            const addFood = (name) => {
+                const existingFood = foods.find(f => f.name.toLowerCase() === name.toLowerCase());
+                if (existingFood) return;
+
+                setFoods(prev => [...prev, {
+                    id: generateId(),
+                    name: name,
+                    priority: prev.length + 1
+                }]);
+            };
+
+            const deleteFood = (id) => {
+                setFoods(prev => prev.filter(f => f.id !== id));
+            };
+
+            const reorderFoods = (fromIndex, toIndex) => {
+                setFoods(prev => {
+                    const newFoods = [...prev];
+                    const [moved] = newFoods.splice(fromIndex, 1);
+                    newFoods.splice(toIndex, 0, moved);
+                    return newFoods;
+                });
+            };
+
+            // Search restaurants
+            const searchRestaurants = async () => {
+                if (!placesServiceRef.current || !userLocation || foods.length === 0) return;
+
+                setSearchLoading(true);
+                setRestaurants([]);
+
+                // Clear existing markers
+                markersRef.current.forEach(marker => marker.setMap(null));
+                markersRef.current = [];
+
+                const allResults = new Map();
+
+                const searchPromises = foods.map((food, foodIndex) => {
+                    return new Promise((resolve) => {
+                        const request = {
+                            location: userLocation,
+                            radius: distance * MILES_TO_METERS,
+                            type: 'restaurant',
+                            keyword: food.name
+                        };
+
+                        placesServiceRef.current.nearbySearch(request, (results, status) => {
+                            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                                results.forEach(place => {
+                                    const placeDistance = calculateDistance(
+                                        userLocation.lat, userLocation.lng,
+                                        place.geometry.location.lat(), place.geometry.location.lng()
+                                    );
+
+                                    if (placeDistance <= distance) {
+                                        if (allResults.has(place.place_id)) {
+                                            const existing = allResults.get(place.place_id);
+                                            if (!existing.matchedFoods.includes(food.name)) {
+                                                existing.matchedFoods.push(food.name);
+                                            }
+                                        } else {
+                                            allResults.set(place.place_id, {
+                                                placeId: place.place_id,
+                                                name: place.name,
+                                                rating: place.rating,
+                                                reviewCount: place.user_ratings_total,
+                                                distance: placeDistance,
+                                                priceLevel: place.price_level,
+                                                location: {
+                                                    lat: place.geometry.location.lat(),
+                                                    lng: place.geometry.location.lng()
+                                                },
+                                                matchedFoods: [food.name],
+                                                address: place.vicinity,
+                                                isOpen: place.opening_hours?.isOpen?.()
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            resolve();
+                        });
+                    });
+                });
+
+                await Promise.all(searchPromises);
+
+                // Sort by distance (primary), then by rating (secondary)
+                const sortedResults = Array.from(allResults.values()).sort((a, b) => {
+                    if (a.distance !== b.distance) return a.distance - b.distance;
+                    return (b.rating || 0) - (a.rating || 0);
+                });
+
+                setRestaurants(sortedResults);
+
+                // Add markers for restaurants
+                sortedResults.forEach((restaurant, index) => {
+                    const marker = new google.maps.Marker({
+                        position: restaurant.location,
+                        map: mapInstanceRef.current,
+                        title: restaurant.name,
+                        label: {
+                            text: (index + 1).toString(),
+                            color: '#ffffff',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        },
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 15,
+                            fillColor: '#4ade80',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 2
+                        }
+                    });
+
+                    marker.addListener('click', () => {
+                        setSelectedRestaurant(restaurant.placeId);
+                        // Scroll to card
+                        const card = document.querySelector(`[data-place-id="${restaurant.placeId}"]`);
+                        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+
+                    markersRef.current.push(marker);
+                });
+
+                // Fit bounds to show all markers
+                if (sortedResults.length > 0) {
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(userLocation);
+                    sortedResults.forEach(r => bounds.extend(r.location));
+                    mapInstanceRef.current.fitBounds(bounds, 50);
+                }
+
+                setSearchLoading(false);
+            };
+
+            // Handle restaurant card click
+            const handleRestaurantClick = (placeId) => {
+                setSelectedRestaurant(placeId);
+                const restaurant = restaurants.find(r => r.placeId === placeId);
+                if (restaurant && mapInstanceRef.current) {
+                    mapInstanceRef.current.panTo(restaurant.location);
+                    mapInstanceRef.current.setZoom(15);
+                }
+            };
+
+            // Show API key modal if no key
+            if (!apiKey || (!apiReady && apiKey)) {
+                return (
+                    <ApiKeyModal
+                        onSubmit={handleApiKeySubmit}
+                        error={apiKeyError}
+                        loading={apiKeyLoading}
+                    />
+                );
+            }
+
+            const locationStatus = locationLoading ? 'loading' : (locationError ? 'error' : 'success');
+
+            return (
+                <div className="app-container">
+                    <header className="header">
+                        <h1><span>🍔</span> Food Finder</h1>
+                        <div className="location-status">
+                            <div className={`location-dot ${locationStatus === 'error' ? 'error' : ''} ${locationStatus === 'loading' ? 'loading' : ''}`}></div>
+                            <span>
+                                {locationLoading ? 'Getting location...' :
+                                 locationError ? locationError :
+                                 `Location: ${userLocation?.lat.toFixed(4)}, ${userLocation?.lng.toFixed(4)}`}
+                            </span>
+                        </div>
+                    </header>
+
+                    <main className="main-content">
+                        <FoodsPanel
+                            foods={foods}
+                            onAddFood={addFood}
+                            onDeleteFood={deleteFood}
+                            onReorderFoods={reorderFoods}
+                        />
+
+                        <div className="results-panel">
+                            <div className="controls-bar">
+                                <div className="distance-selector">
+                                    <span className="distance-label">Search radius:</span>
+                                    <div className="distance-buttons">
+                                        {DISTANCE_OPTIONS.map(d => (
+                                            <button
+                                                key={d}
+                                                className={`distance-btn ${distance === d ? 'active' : ''}`}
+                                                onClick={() => setDistance(d)}
+                                            >
+                                                {d} mi
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    className="search-btn"
+                                    onClick={searchRestaurants}
+                                    disabled={!userLocation || foods.length === 0 || searchLoading}
+                                >
+                                    {searchLoading ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Searching...
+                                        </>
+                                    ) : (
+                                        <>🔍 Find Restaurants</>
+                                    )}
+                                </button>
+                                {restaurants.length > 0 && (
+                                    <span className="results-count">
+                                        {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} found
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="map-results-container">
+                                <div className="map-container">
+                                    {!userLocation ? (
+                                        <div className="map-placeholder">
+                                            <div className="map-placeholder-icon">🗺️</div>
+                                            <p>{locationLoading ? 'Getting your location...' : 'Enable location to see the map'}</p>
+                                        </div>
+                                    ) : (
+                                        <div id="map" ref={mapRef}></div>
+                                    )}
+                                    {searchLoading && (
+                                        <div className="loading-overlay">
+                                            <span className="loading-spinner" style={{width: 40, height: 40}}></span>
+                                            <span>Searching for restaurants...</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="restaurants-list">
+                                    {restaurants.length === 0 ? (
+                                        <div className="empty-results">
+                                            <div className="empty-results-icon">🍽️</div>
+                                            <p>
+                                                {foods.length === 0
+                                                    ? 'Add your favorite foods, then search!'
+                                                    : 'Click "Find Restaurants" to discover nearby options'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        restaurants.map(restaurant => (
+                                            <div key={restaurant.placeId} data-place-id={restaurant.placeId}>
+                                                <RestaurantCard
+                                                    restaurant={restaurant}
+                                                    isSelected={selectedRestaurant === restaurant.placeId}
+                                                    onClick={() => handleRestaurantClick(restaurant.placeId)}
+                                                    userLocation={userLocation}
+                                                />
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <footer className="footer">
+                        <div className="api-status">
+                            <div className={`api-status-dot ${apiReady ? '' : 'error'}`}></div>
+                            <span>Google Maps API: {apiReady ? 'Connected' : 'Not connected'}</span>
+                        </div>
+                        <button
+                            className="change-key-btn"
+                            onClick={() => {
+                                localStorage.removeItem(STORAGE_KEYS.API_KEY);
+                                setApiKey('');
+                                setApiReady(false);
+                            }}
+                        >
+                            Change API Key
+                        </button>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
