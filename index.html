@@ -38,11 +38,21 @@
             --radius-lg: 20px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        [data-theme="dark"] {
+            --primary: #ff4d4d;
+            --primary-dark: #d32323;
+            --primary-light: #ff6b6b;
+            --secondary: #4da6ff;
+            --bg-white: #1a1a2e;
+            --bg-light: #16162a;
+            --bg-card: #1f1f3a;
+            --text-dark: #ffffff;
+            --text-medium: #b0b0b0;
+            --text-light: #808080;
+            --border: #2a2a4a;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -50,27 +60,23 @@
             color: var(--text-dark);
             min-height: 100vh;
             line-height: 1.5;
+            transition: background 0.3s, color 0.3s;
         }
 
-        #root {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        #root { min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-light); }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
         /* Header */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 20px 24px;
+            padding: 16px 24px;
             color: white;
             box-shadow: var(--shadow-md);
-            position: relative;
+            position: sticky;
+            top: 0;
             z-index: 100;
         }
 
@@ -81,298 +87,258 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
             gap: 12px;
         }
 
-        .logo-icon {
-            font-size: 36px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 32px; }
+        .logo h1 { font-size: 24px; font-weight: 800; }
 
-        .logo h1 {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
 
-        .location-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .header-btn {
             background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
             padding: 8px 16px;
             border-radius: 50px;
             font-size: 14px;
-            backdrop-filter: blur(10px);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
         }
 
-        .location-dot {
-            width: 10px;
-            height: 10px;
+        .header-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-btn.active { background: white; color: var(--primary); }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: #4ade80;
-            animation: pulse 2s infinite;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        .location-dot.error { background: #ff6b6b; animation: none; }
-        .location-dot.loading { background: #fbbf24; }
+        .theme-toggle:hover { background: rgba(255,255,255,0.3); transform: rotate(20deg); }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px;
+            border-radius: 50px;
         }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-tab.active { background: white; color: var(--primary); }
+        .nav-tab:hover:not(.active) { background: rgba(255,255,255,0.1); }
 
         /* Main Layout */
         .main-content {
             flex: 1;
-            display: flex;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
-            padding: 24px;
-            gap: 24px;
-        }
-
-        /* Left Panel - Foods */
-        .foods-panel {
-            width: 320px;
-            min-width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .panel-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-        }
-
-        .panel-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
-            color: white;
         }
 
-        .panel-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .panel-subtitle {
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .add-food-form {
-            padding: 16px;
+        /* Quick Cuisines */
+        .quick-cuisines {
             display: flex;
             gap: 10px;
-            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-        .add-food-input {
-            flex: 1;
+        .cuisine-btn {
+            background: var(--bg-card);
             border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            font-size: 15px;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .add-food-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(211, 35, 35, 0.1);
-        }
-
-        .add-food-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 14px;
             font-weight: 600;
-            font-family: inherit;
             cursor: pointer;
             transition: all 0.2s;
-        }
-
-        .add-food-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .add-food-btn:active { transform: translateY(0); }
-        .add-food-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        .foods-list {
-            padding: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .food-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px;
-            background: var(--bg-light);
-            border-radius: var(--radius-sm);
-            margin-bottom: 10px;
-            cursor: grab;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .food-item:hover {
-            border-color: var(--primary);
+            gap: 6px;
+            color: var(--text-dark);
             box-shadow: var(--shadow-sm);
         }
 
-        .food-item.dragging { opacity: 0.5; }
-        .food-item.drag-over { border-color: var(--secondary); background: #e3f2fd; }
+        .cuisine-btn:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .cuisine-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .food-priority {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .food-name {
-            flex: 1;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .food-delete {
-            width: 28px;
-            height: 28px;
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.2s;
-        }
-
-        .food-delete:hover {
-            background: #fee2e2;
-            color: var(--primary);
-        }
-
-        .empty-foods {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-medium);
-        }
-
-        .empty-foods-icon { font-size: 56px; margin-bottom: 12px; }
-
-        /* Controls Card */
-        .controls-card {
+        /* Search Section */
+        .search-section {
             background: var(--bg-card);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
             padding: 20px;
+            margin-bottom: 20px;
         }
 
-        .controls-row {
+        .search-row {
             display: flex;
+            gap: 12px;
             flex-wrap: wrap;
-            gap: 16px;
-            align-items: center;
+            align-items: flex-end;
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .search-input-group { flex: 1; min-width: 200px; }
 
-        .control-label {
+        .input-label {
+            display: block;
             font-size: 12px;
             font-weight: 600;
             color: var(--text-medium);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
-        .distance-buttons {
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-family: inherit;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .search-input:focus { outline: none; border-color: var(--primary); }
+
+        .filter-group {
             display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 14px;
+            border: 2px solid var(--border);
             background: var(--bg-light);
             border-radius: var(--radius-sm);
-            padding: 4px;
-        }
-
-        .distance-btn {
-            background: none;
-            border: none;
-            padding: 10px 14px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            font-family: inherit;
             cursor: pointer;
-            border-radius: 6px;
             transition: all 0.2s;
-            color: var(--text-medium);
+            color: var(--text-dark);
         }
 
-        .distance-btn.active {
-            background: var(--primary);
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter-btn:hover:not(.active) { border-color: var(--primary); }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
             box-shadow: var(--shadow-sm);
         }
 
-        .distance-btn:hover:not(.active) { background: #e0e0e0; }
+        .search-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .search-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .toggle-container {
+        /* Recent Searches */
+        .recent-searches {
+            margin-top: 12px;
             display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 10px;
         }
 
-        .toggle {
+        .recent-label { font-size: 12px; color: var(--text-medium); }
+
+        .recent-tag {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-dark);
+        }
+
+        .recent-tag:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Filters Bar */
+        .filters-bar {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label { font-size: 13px; font-weight: 600; color: var(--text-medium); }
+
+        .toggle-switch {
             position: relative;
-            width: 50px;
-            height: 28px;
+            width: 48px;
+            height: 26px;
             cursor: pointer;
         }
 
-        .toggle input { display: none; }
+        .toggle-switch input { display: none; }
 
         .toggle-track {
             position: absolute;
             inset: 0;
-            background: #ccc;
-            border-radius: 14px;
+            background: var(--border);
+            border-radius: 13px;
             transition: all 0.2s;
         }
 
-        .toggle input:checked + .toggle-track { background: var(--success); }
+        .toggle-switch input:checked + .toggle-track { background: var(--success); }
 
         .toggle-thumb {
             position: absolute;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             background: white;
             border-radius: 50%;
             top: 3px;
@@ -381,58 +347,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .toggle input:checked ~ .toggle-thumb { transform: translateX(22px); }
+        .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(22px); }
 
-        .toggle-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .search-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            border: none;
+        .sort-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 14px 28px;
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 13px;
             font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: var(--shadow-sm);
-            margin-left: auto;
-        }
-
-        .search-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .search-btn:active { transform: translateY(0); }
-        .search-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        /* Results Panel */
-        .results-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            min-width: 0;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .results-title {
-            font-size: 22px;
-            font-weight: 700;
+            background: var(--bg-light);
             color: var(--text-dark);
+            cursor: pointer;
         }
 
         .results-count {
+            margin-left: auto;
             font-size: 14px;
             color: var(--text-medium);
             background: var(--bg-light);
@@ -440,14 +369,13 @@
             border-radius: 50px;
         }
 
+        /* Map and Results Container */
         .map-results-container {
             display: flex;
             gap: 20px;
-            flex: 1;
-            min-height: 500px;
+            min-height: 600px;
         }
 
-        /* Map */
         .map-container {
             flex: 1;
             border-radius: var(--radius-md);
@@ -455,6 +383,7 @@
             box-shadow: var(--shadow-md);
             position: relative;
             min-height: 400px;
+            background: var(--bg-card);
         }
 
         #map { width: 100%; height: 100%; }
@@ -462,7 +391,6 @@
         .map-placeholder {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -470,7 +398,7 @@
             color: var(--text-medium);
         }
 
-        .map-placeholder-icon { font-size: 72px; margin-bottom: 16px; }
+        .map-placeholder-icon { font-size: 64px; margin-bottom: 12px; }
 
         .loading-overlay {
             position: absolute;
@@ -480,8 +408,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 12px;
         }
+
+        [data-theme="dark"] .loading-overlay { background: rgba(26,26,46,0.9); }
 
         .loading-spinner {
             width: 48px;
@@ -496,14 +426,13 @@
 
         /* Restaurant List */
         .restaurants-list {
-            width: 420px;
-            min-width: 420px;
+            width: 450px;
+            min-width: 450px;
             max-height: 700px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            padding-right: 8px;
         }
 
         .restaurant-card {
@@ -516,196 +445,406 @@
             border: 2px solid transparent;
         }
 
-        .restaurant-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
+        .restaurant-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .restaurant-card.selected { border-color: var(--primary); }
+
+        .restaurant-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: var(--bg-light);
         }
 
-        .restaurant-card.selected {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .restaurant-content {
-            padding: 20px;
-        }
+        .restaurant-content { padding: 16px; }
 
         .restaurant-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .restaurant-name {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: var(--text-dark);
-            line-height: 1.3;
+            flex: 1;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:hover { transform: scale(1.2); }
+        .favorite-btn.active { animation: heartPop 0.3s ease; }
+
+        @keyframes heartPop {
+            50% { transform: scale(1.3); }
         }
 
         .restaurant-distance {
-            background: linear-gradient(135deg, var(--secondary) 0%, #00a0dc 100%);
+            background: var(--secondary);
             color: white;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 50px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            white-space: nowrap;
-            margin-left: 12px;
+            margin-left: 8px;
         }
 
         .restaurant-rating {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 6px;
+            margin-bottom: 8px;
         }
 
-        .stars {
-            display: flex;
-            gap: 2px;
-        }
+        .stars { display: flex; gap: 1px; }
+        .star { font-size: 16px; color: var(--star); }
+        .star.empty { color: var(--border); }
 
-        .star { font-size: 18px; color: var(--star); }
-        .star.empty { color: #ddd; }
-
-        .rating-text {
-            font-size: 14px;
-            color: var(--text-medium);
-        }
-
-        .rating-number {
-            font-weight: 700;
-            color: var(--text-dark);
-        }
+        .rating-text { font-size: 13px; color: var(--text-medium); }
+        .rating-number { font-weight: 700; color: var(--text-dark); }
 
         .restaurant-meta {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
         }
 
-        .meta-item {
-            font-size: 14px;
-            color: var(--text-medium);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
+        .meta-item { color: var(--text-medium); display: flex; align-items: center; gap: 4px; }
         .meta-item.open { color: var(--success); font-weight: 600; }
         .meta-item.closed { color: var(--primary); font-weight: 600; }
+        .price-tag { font-weight: 600; color: var(--success); }
 
-        .price-tag {
-            font-weight: 600;
-            color: var(--success);
+        .restaurant-hours {
+            font-size: 12px;
+            color: var(--text-medium);
+            margin-bottom: 10px;
+            padding: 8px;
+            background: var(--bg-light);
+            border-radius: var(--radius-sm);
         }
 
         .matched-foods {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .food-tag {
             background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
             color: #b7472a;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 50px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
+
+        [data-theme="dark"] .food-tag { background: linear-gradient(135deg, #5a3e2b 0%, #8b4513 100%); color: #ffd700; }
 
         .restaurant-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
         }
 
         .action-btn {
-            display: inline-flex;
+            flex: 1;
+            min-width: fit-content;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 12px;
             border-radius: var(--radius-sm);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            font-family: inherit;
             text-decoration: none;
             transition: all 0.2s;
             border: none;
             cursor: pointer;
         }
 
-        .action-btn.primary {
-            background: var(--primary);
-            color: white;
-        }
-
+        .action-btn.primary { background: var(--primary); color: white; }
         .action-btn.primary:hover { background: var(--primary-dark); }
+        .action-btn.secondary { background: var(--bg-light); color: var(--text-dark); border: 1px solid var(--border); }
+        .action-btn.secondary:hover { border-color: var(--primary); }
+        .action-btn.call { background: var(--success); color: white; }
 
-        .action-btn.secondary {
-            background: var(--bg-light);
-            color: var(--text-dark);
-            border: 1px solid var(--border);
-        }
-
-        .action-btn.secondary:hover { background: #e8e8e8; }
-
-        .action-btn.outline {
-            background: transparent;
-            color: var(--secondary);
-            border: 2px solid var(--secondary);
-        }
-
-        .action-btn.outline:hover { background: var(--secondary); color: white; }
-
-        .empty-results {
+        /* Empty State */
+        .empty-state {
             text-align: center;
-            padding: 60px 30px;
+            padding: 60px 20px;
             background: var(--bg-card);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
         }
 
-        .empty-results-icon { font-size: 80px; margin-bottom: 20px; }
-        .empty-results h3 { font-size: 20px; margin-bottom: 10px; color: var(--text-dark); }
-        .empty-results p { color: var(--text-medium); }
+        .empty-state-icon { font-size: 72px; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 20px; margin-bottom: 8px; }
+        .empty-state p { color: var(--text-medium); }
+
+        /* Favorites Tab */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        /* Group Voting Tab */
+        .voting-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .voting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .voting-title { font-size: 20px; font-weight: 700; }
+
+        .add-voter-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .voters-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .voter-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-light);
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+
+        .voter-chip.active { background: var(--primary); color: white; }
+
+        .voter-remove {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+        }
+
+        .voter-remove:hover { opacity: 1; }
+
+        .voting-restaurants {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .vote-card {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .vote-card:hover { border-color: var(--primary); }
+        .vote-card.voted { border-color: var(--success); background: rgba(65, 167, 0, 0.1); }
+
+        .vote-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .vote-card-name { font-weight: 700; font-size: 15px; }
+
+        .vote-count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .vote-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .vote-btn:hover, .vote-btn.voted { background: var(--primary); color: white; }
+
+        .vote-avatars {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .vote-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Group Order Tab */
+        .order-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .order-restaurant-select {
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            min-width: 200px;
+        }
+
+        .order-list { margin-top: 20px; }
+
+        .order-person {
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .order-person-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-person-name { font-weight: 700; font-size: 15px; }
+
+        .order-items { margin-left: 16px; }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-item:last-child { border-bottom: none; }
+
+        .add-order-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .add-order-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background: var(--bg-card);
+            color: var(--text-dark);
+        }
+
+        .order-total {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .share-order-btn {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+        }
 
         /* Footer */
         .footer {
-            background: var(--text-dark);
-            color: white;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
             padding: 16px 24px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
+            color: var(--text-medium);
         }
 
-        .footer a { color: var(--primary-light); }
-
         /* Responsive */
-        @media (max-width: 1200px) {
-            .main-content { flex-direction: column; }
-            .foods-panel { width: 100%; min-width: 100%; flex-direction: row; gap: 20px; }
-            .foods-panel > * { flex: 1; }
-            .restaurants-list { width: 100%; min-width: 100%; max-height: none; }
+        @media (max-width: 1100px) {
             .map-results-container { flex-direction: column; }
+            .restaurants-list { width: 100%; min-width: 100%; max-height: none; }
+            .map-container { min-height: 350px; }
         }
 
         @media (max-width: 768px) {
-            .header { padding: 16px; }
-            .logo h1 { font-size: 22px; }
-            .main-content { padding: 16px; }
-            .foods-panel { flex-direction: column; }
-            .controls-row { flex-direction: column; align-items: stretch; }
-            .search-btn { margin-left: 0; width: 100%; justify-content: center; }
+            .header { padding: 12px 16px; }
+            .logo h1 { font-size: 20px; }
+            .header-actions { width: 100%; justify-content: center; }
+            .nav-tabs { width: 100%; justify-content: center; }
+            .main-content { padding: 12px; }
+            .search-row { flex-direction: column; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .results-count { margin-left: 0; text-align: center; }
+            .quick-cuisines { justify-content: center; }
             .restaurant-actions { flex-direction: column; }
-            .action-btn { justify-content: center; }
+            .action-btn { width: 100%; }
         }
     </style>
 </head>
@@ -713,209 +852,441 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         // Constants
         const GOOGLE_API_KEY = 'AIzaSyDeTlwdCU0nEO9QTCN5vXzMuDMuhiIrnSU';
-        const STORAGE_KEYS = { FAVORITES: 'foodfinder_favorite_foods' };
-        const DISTANCE_OPTIONS = [5, 10, 15, 25];
+        const STORAGE_KEYS = {
+            FAVORITES: 'foodfinder_favorites',
+            RECENT: 'foodfinder_recent',
+            THEME: 'foodfinder_theme',
+            VOTERS: 'foodfinder_voters',
+            VOTES: 'foodfinder_votes',
+            ORDERS: 'foodfinder_orders'
+        };
         const MILES_TO_METERS = 1609.34;
 
-        // Utility Functions
+        const CUISINES = [
+            { emoji: '🍕', name: 'Pizza' },
+            { emoji: '🌮', name: 'Mexican' },
+            { emoji: '🍜', name: 'Chinese' },
+            { emoji: '🍣', name: 'Sushi' },
+            { emoji: '🍔', name: 'Burgers' },
+            { emoji: '🍗', name: 'Chicken' },
+            { emoji: '🥗', name: 'Salads' },
+            { emoji: '🍝', name: 'Italian' },
+            { emoji: '🍛', name: 'Indian' },
+            { emoji: '🥡', name: 'Thai' }
+        ];
+
+        // Utilities
         const generateId = () => Math.random().toString(36).substr(2, 9);
 
         const calculateDistance = (lat1, lng1, lat2, lng2) => {
             const R = 3959;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         };
 
         const formatDistance = (miles) => miles < 0.1 ? '< 0.1 mi' : `${miles.toFixed(1)} mi`;
 
-        const getPriceLevel = (level) => {
-            if (level === undefined || level === null) return null;
-            return '$'.repeat(level + 1);
-        };
+        const getPriceLevel = (level) => level != null ? '$'.repeat(level + 1) : null;
 
-        // Food Item Component
-        const FoodItem = ({ food, index, onDelete, onDragStart, onDragOver, onDrop, isDragging, isDragOver }) => (
-            <div
-                className={`food-item ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
-                draggable
-                onDragStart={(e) => onDragStart(e, index)}
-                onDragOver={(e) => onDragOver(e, index)}
-                onDrop={(e) => onDrop(e, index)}
-            >
-                <div className="food-priority">{index + 1}</div>
-                <span className="food-name">{food.name}</span>
-                <button className="food-delete" onClick={() => onDelete(food.id)}>×</button>
+        // Star Rating
+        const StarRating = ({ rating }) => (
+            <div className="stars">
+                {[...Array(5)].map((_, i) => (
+                    <span key={i} className={`star ${i < Math.round(rating || 0) ? '' : 'empty'}`}>★</span>
+                ))}
             </div>
         );
 
-        // Foods Panel Component
-        const FoodsPanel = ({ foods, onAddFood, onDeleteFood, onReorderFoods }) => {
-            const [newFood, setNewFood] = useState('');
-            const [dragIndex, setDragIndex] = useState(null);
-            const [dragOverIndex, setDragOverIndex] = useState(null);
+        // Restaurant Card
+        const RestaurantCard = ({ restaurant, isFavorite, onToggleFavorite, isSelected, onClick }) => {
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.name)}&destination_place_id=${restaurant.placeId}`;
+            const yelpUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name)}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
+            const menuUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' menu')}`;
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (newFood.trim()) {
-                    onAddFood(newFood.trim());
-                    setNewFood('');
+            const handleShare = async (e) => {
+                e.stopPropagation();
+                const text = `Check out ${restaurant.name}!\n${restaurant.rating ? `⭐ ${restaurant.rating.toFixed(1)}` : ''}\n📍 ${restaurant.address || 'See on map'}\n${directionsUrl}`;
+                if (navigator.share) {
+                    await navigator.share({ title: restaurant.name, text });
+                } else {
+                    navigator.clipboard.writeText(text);
+                    alert('Copied to clipboard!');
                 }
             };
 
             return (
-                <div className="panel-card">
-                    <div className="panel-header">
-                        <div className="panel-title">What are you craving?</div>
-                        <div className="panel-subtitle">Add foods to find matching restaurants</div>
-                    </div>
-                    <form className="add-food-form" onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            className="add-food-input"
-                            placeholder="Pizza, Tacos, Sushi..."
-                            value={newFood}
-                            onChange={(e) => setNewFood(e.target.value)}
-                        />
-                        <button type="submit" className="add-food-btn" disabled={!newFood.trim()}>Add</button>
-                    </form>
-                    <div className="foods-list">
-                        {foods.length === 0 ? (
-                            <div className="empty-foods">
-                                <div className="empty-foods-icon">🍕</div>
-                                <p>Add your favorite foods to get started!</p>
-                            </div>
-                        ) : (
-                            foods.map((food, index) => (
-                                <FoodItem
-                                    key={food.id}
-                                    food={food}
-                                    index={index}
-                                    onDelete={onDeleteFood}
-                                    onDragStart={(e, i) => setDragIndex(i)}
-                                    onDragOver={(e, i) => { e.preventDefault(); setDragOverIndex(i); }}
-                                    onDrop={(e, i) => {
-                                        e.preventDefault();
-                                        if (dragIndex !== null && dragIndex !== i) onReorderFoods(dragIndex, i);
-                                        setDragIndex(null);
-                                        setDragOverIndex(null);
-                                    }}
-                                    isDragging={dragIndex === index}
-                                    isDragOver={dragOverIndex === index}
-                                />
-                            ))
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // Star Rating Component
-        const StarRating = ({ rating }) => {
-            const stars = [];
-            for (let i = 0; i < 5; i++) {
-                stars.push(
-                    <span key={i} className={`star ${i < Math.round(rating) ? '' : 'empty'}`}>★</span>
-                );
-            }
-            return <div className="stars">{stars}</div>;
-        };
-
-        // Restaurant Card Component
-        const RestaurantCard = ({ restaurant, isSelected, onClick, userLocation }) => {
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.name)}&destination_place_id=${restaurant.placeId}`;
-            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || ''))}`;
-            const menuSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' menu')}`;
-            const yelpSearchUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(restaurant.name)}&find_loc=${encodeURIComponent(restaurant.address || '')}`;
-
-            return (
                 <div className={`restaurant-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
+                    {restaurant.photo && <img src={restaurant.photo} alt={restaurant.name} className="restaurant-image" />}
                     <div className="restaurant-content">
                         <div className="restaurant-header">
-                            <div className="restaurant-name">{restaurant.name}</div>
-                            <div className="restaurant-distance">{formatDistance(restaurant.distance)}</div>
+                            <div style={{flex: 1}}>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <span className="restaurant-name">{restaurant.name}</span>
+                                    <span className="restaurant-distance">{formatDistance(restaurant.distance)}</span>
+                                </div>
+                            </div>
+                            <button
+                                className={`favorite-btn ${isFavorite ? 'active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); onToggleFavorite(restaurant); }}
+                            >
+                                {isFavorite ? '❤️' : '🤍'}
+                            </button>
                         </div>
 
                         <div className="restaurant-rating">
-                            <StarRating rating={restaurant.rating || 0} />
+                            <StarRating rating={restaurant.rating} />
                             <span className="rating-text">
                                 <span className="rating-number">{restaurant.rating?.toFixed(1) || 'N/A'}</span>
-                                {' '}({restaurant.reviewCount || 0} reviews)
+                                {' '}({restaurant.reviewCount || 0})
                             </span>
                         </div>
 
                         <div className="restaurant-meta">
-                            {getPriceLevel(restaurant.priceLevel) && (
-                                <span className="meta-item">
-                                    <span className="price-tag">{getPriceLevel(restaurant.priceLevel)}</span>
-                                </span>
-                            )}
+                            {getPriceLevel(restaurant.priceLevel) && <span className="price-tag">{getPriceLevel(restaurant.priceLevel)}</span>}
                             {restaurant.isOpen !== undefined && (
                                 <span className={`meta-item ${restaurant.isOpen ? 'open' : 'closed'}`}>
-                                    {restaurant.isOpen ? '● Open Now' : '● Closed'}
+                                    {restaurant.isOpen ? '● Open' : '● Closed'}
                                 </span>
-                            )}
-                            {restaurant.address && (
-                                <span className="meta-item">📍 {restaurant.address}</span>
                             )}
                         </div>
 
+                        {restaurant.hours && (
+                            <div className="restaurant-hours">🕐 {restaurant.hours}</div>
+                        )}
+
                         {restaurant.matchedFoods?.length > 0 && (
                             <div className="matched-foods">
-                                {restaurant.matchedFoods.map((food, i) => (
-                                    <span key={i} className="food-tag">{food}</span>
-                                ))}
+                                {restaurant.matchedFoods.map((f, i) => <span key={i} className="food-tag">{f}</span>)}
                             </div>
                         )}
 
                         <div className="restaurant-actions">
-                            <a href={yelpSearchUrl} target="_blank" rel="noopener noreferrer" className="action-btn primary" onClick={(e) => e.stopPropagation()}>
-                                View on Yelp
+                            {restaurant.phone && (
+                                <a href={`tel:${restaurant.phone}`} className="action-btn call" onClick={e => e.stopPropagation()}>
+                                    📞 Call
+                                </a>
+                            )}
+                            <a href={yelpUrl} target="_blank" rel="noopener noreferrer" className="action-btn primary" onClick={e => e.stopPropagation()}>
+                                Yelp
                             </a>
-                            <a href={menuSearchUrl} target="_blank" rel="noopener noreferrer" className="action-btn secondary" onClick={(e) => e.stopPropagation()}>
-                                🍽️ Menu
+                            <a href={menuUrl} target="_blank" rel="noopener noreferrer" className="action-btn secondary" onClick={e => e.stopPropagation()}>
+                                Menu
                             </a>
-                            <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="action-btn outline" onClick={(e) => e.stopPropagation()}>
-                                📍 Directions
+                            <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="action-btn secondary" onClick={e => e.stopPropagation()}>
+                                📍
                             </a>
+                            <button className="action-btn secondary" onClick={handleShare}>
+                                📤
+                            </button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // Main App Component
+        // Group Voting Component
+        const GroupVoting = ({ restaurants, favorites }) => {
+            const [voters, setVoters] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTERS) || '[]'));
+            const [votes, setVotes] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTES) || '{}'));
+            const [newVoter, setNewVoter] = useState('');
+            const [activeVoter, setActiveVoter] = useState(voters[0] || '');
+
+            const votingRestaurants = [...restaurants.slice(0, 10), ...favorites.filter(f => !restaurants.find(r => r.placeId === f.placeId))].slice(0, 15);
+
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEYS.VOTERS, JSON.stringify(voters));
+                localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(votes));
+            }, [voters, votes]);
+
+            const addVoter = (e) => {
+                e.preventDefault();
+                if (newVoter.trim() && !voters.includes(newVoter.trim())) {
+                    const name = newVoter.trim();
+                    setVoters([...voters, name]);
+                    setActiveVoter(name);
+                    setNewVoter('');
+                }
+            };
+
+            const removeVoter = (name) => {
+                setVoters(voters.filter(v => v !== name));
+                const newVotes = { ...votes };
+                Object.keys(newVotes).forEach(k => {
+                    newVotes[k] = newVotes[k].filter(v => v !== name);
+                });
+                setVotes(newVotes);
+                if (activeVoter === name) setActiveVoter(voters[0] || '');
+            };
+
+            const toggleVote = (placeId) => {
+                if (!activeVoter) return;
+                const current = votes[placeId] || [];
+                if (current.includes(activeVoter)) {
+                    setVotes({ ...votes, [placeId]: current.filter(v => v !== activeVoter) });
+                } else {
+                    setVotes({ ...votes, [placeId]: [...current, activeVoter] });
+                }
+            };
+
+            const getVoteCount = (placeId) => (votes[placeId] || []).length;
+            const hasVoted = (placeId) => (votes[placeId] || []).includes(activeVoter);
+
+            const sortedRestaurants = [...votingRestaurants].sort((a, b) => getVoteCount(b.placeId) - getVoteCount(a.placeId));
+            const winner = sortedRestaurants[0] && getVoteCount(sortedRestaurants[0].placeId) > 0 ? sortedRestaurants[0] : null;
+
+            return (
+                <div className="voting-section">
+                    <div className="voting-header">
+                        <h2 className="voting-title">🗳️ Group Voting</h2>
+                        {winner && <div style={{color: 'var(--success)', fontWeight: 700}}>🏆 Leading: {winner.name}</div>}
+                    </div>
+
+                    <form className="add-voter-form" onSubmit={addVoter}>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Add family member..."
+                            value={newVoter}
+                            onChange={e => setNewVoter(e.target.value)}
+                            style={{flex: 1}}
+                        />
+                        <button type="submit" className="search-btn">Add</button>
+                    </form>
+
+                    {voters.length > 0 && (
+                        <div className="voters-list">
+                            {voters.map(v => (
+                                <div key={v} className={`voter-chip ${activeVoter === v ? 'active' : ''}`} onClick={() => setActiveVoter(v)}>
+                                    {v}
+                                    <button className="voter-remove" onClick={(e) => { e.stopPropagation(); removeVoter(v); }}>×</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {votingRestaurants.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">🗳️</div>
+                            <h3>Search for restaurants first</h3>
+                            <p>Find some restaurants to vote on!</p>
+                        </div>
+                    ) : (
+                        <div className="voting-restaurants">
+                            {sortedRestaurants.map(r => (
+                                <div key={r.placeId} className={`vote-card ${hasVoted(r.placeId) ? 'voted' : ''}`}>
+                                    <div className="vote-card-header">
+                                        <span className="vote-card-name">{r.name}</span>
+                                        <span className="vote-count">{getVoteCount(r.placeId)} votes</span>
+                                    </div>
+                                    <div style={{fontSize: '13px', color: 'var(--text-medium)'}}>
+                                        {r.rating && `⭐ ${r.rating.toFixed(1)}`} · {formatDistance(r.distance)}
+                                    </div>
+                                    {(votes[r.placeId] || []).length > 0 && (
+                                        <div className="vote-avatars">
+                                            {(votes[r.placeId] || []).map(v => (
+                                                <div key={v} className="vote-avatar" title={v}>{v.charAt(0).toUpperCase()}</div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <button
+                                        className={`vote-btn ${hasVoted(r.placeId) ? 'voted' : ''}`}
+                                        onClick={() => toggleVote(r.placeId)}
+                                        disabled={!activeVoter}
+                                    >
+                                        {hasVoted(r.placeId) ? '✓ Voted' : 'Vote'}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Group Order Component
+        const GroupOrder = ({ restaurants, favorites, voters }) => {
+            const allRestaurants = [...restaurants, ...favorites.filter(f => !restaurants.find(r => r.placeId === f.placeId))];
+            const [selectedRestaurant, setSelectedRestaurant] = useState('');
+            const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '{}'));
+            const [newItem, setNewItem] = useState({});
+
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+            }, [orders]);
+
+            const currentOrders = orders[selectedRestaurant] || {};
+
+            const addItem = (person) => {
+                if (!newItem[person]?.trim()) return;
+                const current = currentOrders[person] || [];
+                setOrders({
+                    ...orders,
+                    [selectedRestaurant]: {
+                        ...currentOrders,
+                        [person]: [...current, { item: newItem[person].trim(), id: generateId() }]
+                    }
+                });
+                setNewItem({ ...newItem, [person]: '' });
+            };
+
+            const removeItem = (person, itemId) => {
+                const current = currentOrders[person] || [];
+                setOrders({
+                    ...orders,
+                    [selectedRestaurant]: {
+                        ...currentOrders,
+                        [person]: current.filter(i => i.id !== itemId)
+                    }
+                });
+            };
+
+            const getTotalItems = () => Object.values(currentOrders).flat().length;
+
+            const shareOrder = async () => {
+                const restaurant = allRestaurants.find(r => r.placeId === selectedRestaurant);
+                let text = `📋 Group Order - ${restaurant?.name || 'Restaurant'}\n\n`;
+                Object.entries(currentOrders).forEach(([person, items]) => {
+                    if (items.length > 0) {
+                        text += `${person}:\n`;
+                        items.forEach(i => { text += `  • ${i.item}\n`; });
+                        text += '\n';
+                    }
+                });
+                text += `Total items: ${getTotalItems()}`;
+
+                if (navigator.share) {
+                    await navigator.share({ title: 'Group Order', text });
+                } else {
+                    navigator.clipboard.writeText(text);
+                    alert('Order copied to clipboard!');
+                }
+            };
+
+            return (
+                <div className="order-section">
+                    <div className="order-header">
+                        <h2 className="voting-title">📋 Group Order</h2>
+                        <select
+                            className="order-restaurant-select"
+                            value={selectedRestaurant}
+                            onChange={e => setSelectedRestaurant(e.target.value)}
+                        >
+                            <option value="">Select restaurant...</option>
+                            {allRestaurants.map(r => (
+                                <option key={r.placeId} value={r.placeId}>{r.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {!selectedRestaurant ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">🍽️</div>
+                            <h3>Select a restaurant</h3>
+                            <p>Choose where you're ordering from</p>
+                        </div>
+                    ) : voters.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">👥</div>
+                            <h3>Add family members</h3>
+                            <p>Go to Voting tab to add people</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="order-list">
+                                {voters.map(person => (
+                                    <div key={person} className="order-person">
+                                        <div className="order-person-header">
+                                            <span className="order-person-name">{person}</span>
+                                            <span style={{color: 'var(--text-medium)', fontSize: '13px'}}>
+                                                {(currentOrders[person] || []).length} items
+                                            </span>
+                                        </div>
+                                        <div className="order-items">
+                                            {(currentOrders[person] || []).map(item => (
+                                                <div key={item.id} className="order-item">
+                                                    <span>{item.item}</span>
+                                                    <button
+                                                        onClick={() => removeItem(person, item.id)}
+                                                        style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)'}}
+                                                    >×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <form className="add-order-form" onSubmit={e => { e.preventDefault(); addItem(person); }}>
+                                            <input
+                                                type="text"
+                                                className="add-order-input"
+                                                placeholder="Add item..."
+                                                value={newItem[person] || ''}
+                                                onChange={e => setNewItem({ ...newItem, [person]: e.target.value })}
+                                            />
+                                            <button type="submit" className="action-btn primary" style={{padding: '8px 16px'}}>+</button>
+                                        </form>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {getTotalItems() > 0 && (
+                                <div className="order-total">
+                                    <span style={{fontSize: '18px', fontWeight: 700}}>Total: {getTotalItems()} items</span>
+                                    <button className="share-order-btn" onClick={shareOrder}>📤 Share Order</button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App
         const App = () => {
+            const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEYS.THEME) || 'light');
+            const [activeTab, setActiveTab] = useState('search');
             const [apiReady, setApiReady] = useState(false);
-            const [foods, setFoods] = useState(() => {
-                const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-                return saved ? JSON.parse(saved) : [];
-            });
             const [userLocation, setUserLocation] = useState(null);
-            const [locationError, setLocationError] = useState('');
             const [locationLoading, setLocationLoading] = useState(true);
+
+            const [searchQuery, setSearchQuery] = useState('');
+            const [recentSearches, setRecentSearches] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT) || '[]'));
             const [distance, setDistance] = useState(10);
+            const [priceFilter, setPriceFilter] = useState([]);
             const [openOnly, setOpenOnly] = useState(false);
+            const [sortBy, setSortBy] = useState('distance');
+
             const [restaurants, setRestaurants] = useState([]);
             const [selectedRestaurant, setSelectedRestaurant] = useState(null);
             const [searchLoading, setSearchLoading] = useState(false);
+            const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]'));
+            const [voters] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTERS) || '[]'));
 
             const mapRef = useRef(null);
             const mapInstanceRef = useRef(null);
             const markersRef = useRef([]);
             const placesServiceRef = useRef(null);
 
+            // Theme
             useEffect(() => {
-                localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(foods));
-            }, [foods]);
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem(STORAGE_KEYS.THEME, theme);
+            }, [theme]);
 
+            // Save favorites
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+            }, [favorites]);
+
+            // Save recent searches
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEYS.RECENT, JSON.stringify(recentSearches));
+            }, [recentSearches]);
+
+            // Load Google Maps
             useEffect(() => {
                 if (window.google?.maps) { setApiReady(true); return; }
                 const script = document.createElement('script');
@@ -925,144 +1296,140 @@
                 document.head.appendChild(script);
             }, []);
 
+            // Get location
             useEffect(() => {
-                if (!navigator.geolocation) {
-                    setLocationError('Geolocation not supported');
-                    setLocationLoading(false);
-                    return;
-                }
+                if (!navigator.geolocation) { setLocationLoading(false); return; }
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                        setLocationLoading(false);
-                    },
-                    () => {
-                        setLocationError('Location access denied');
-                        setLocationLoading(false);
-                    },
+                    pos => { setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocationLoading(false); },
+                    () => setLocationLoading(false),
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
             }, []);
 
+            // Init map
             useEffect(() => {
                 if (!apiReady || !userLocation || !mapRef.current || mapInstanceRef.current) return;
-
                 const map = new google.maps.Map(mapRef.current, {
                     center: userLocation,
                     zoom: 13,
-                    styles: [
+                    styles: theme === 'dark' ? [
+                        { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+                        { elementType: 'labels.text.fill', stylers: [{ color: '#8b8b8b' }] },
+                        { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+                        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a4a' }] },
+                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#16162a' }] },
+                    ] : [
                         { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'transit', stylers: [{ visibility: 'off' }] }
                     ],
                     mapTypeControl: false,
                     fullscreenControl: false
                 });
-
                 mapInstanceRef.current = map;
                 placesServiceRef.current = new google.maps.places.PlacesService(map);
-
                 new google.maps.Marker({
                     position: userLocation,
                     map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 12,
-                        fillColor: '#d32323',
-                        fillOpacity: 1,
-                        strokeColor: '#fff',
-                        strokeWeight: 3
-                    },
+                    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 12, fillColor: '#d32323', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 },
                     title: 'You'
                 });
-            }, [apiReady, userLocation]);
+            }, [apiReady, userLocation, theme]);
 
-            const addFood = (name) => {
-                if (foods.find(f => f.name.toLowerCase() === name.toLowerCase())) return;
-                setFoods(prev => [...prev, { id: generateId(), name }]);
+            const toggleFavorite = (restaurant) => {
+                const exists = favorites.find(f => f.placeId === restaurant.placeId);
+                if (exists) {
+                    setFavorites(favorites.filter(f => f.placeId !== restaurant.placeId));
+                } else {
+                    setFavorites([...favorites, restaurant]);
+                }
             };
 
-            const deleteFood = (id) => setFoods(prev => prev.filter(f => f.id !== id));
+            const searchRestaurants = async (query = searchQuery) => {
+                if (!placesServiceRef.current || !userLocation || !query.trim()) return;
 
-            const reorderFoods = (from, to) => {
-                setFoods(prev => {
-                    const arr = [...prev];
-                    const [moved] = arr.splice(from, 1);
-                    arr.splice(to, 0, moved);
-                    return arr;
-                });
-            };
-
-            const searchRestaurants = async () => {
-                if (!placesServiceRef.current || !userLocation || !foods.length) return;
+                // Save to recent
+                const trimmed = query.trim();
+                if (trimmed && !recentSearches.includes(trimmed)) {
+                    setRecentSearches([trimmed, ...recentSearches.slice(0, 9)]);
+                }
 
                 setSearchLoading(true);
                 setRestaurants([]);
                 markersRef.current.forEach(m => m.setMap(null));
                 markersRef.current = [];
 
-                const allResults = new Map();
+                const results = await new Promise(resolve => {
+                    placesServiceRef.current.nearbySearch({
+                        location: userLocation,
+                        radius: distance * MILES_TO_METERS,
+                        type: 'restaurant',
+                        keyword: trimmed
+                    }, (results, status) => {
+                        resolve(status === google.maps.places.PlacesServiceStatus.OK ? results : []);
+                    });
+                });
 
-                await Promise.all(foods.map(food =>
-                    new Promise(resolve => {
-                        placesServiceRef.current.nearbySearch({
-                            location: userLocation,
-                            radius: distance * MILES_TO_METERS,
-                            type: 'restaurant',
-                            keyword: food.name
-                        }, (results, status) => {
-                            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                                results.forEach(place => {
-                                    const dist = calculateDistance(
-                                        userLocation.lat, userLocation.lng,
-                                        place.geometry.location.lat(), place.geometry.location.lng()
-                                    );
-                                    if (dist <= distance) {
-                                        if (allResults.has(place.place_id)) {
-                                            const existing = allResults.get(place.place_id);
-                                            if (!existing.matchedFoods.includes(food.name)) {
-                                                existing.matchedFoods.push(food.name);
-                                            }
-                                        } else {
-                                            allResults.set(place.place_id, {
-                                                placeId: place.place_id,
-                                                name: place.name,
-                                                rating: place.rating,
-                                                reviewCount: place.user_ratings_total,
-                                                distance: dist,
-                                                priceLevel: place.price_level,
-                                                location: { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
-                                                matchedFoods: [food.name],
-                                                address: place.vicinity,
-                                                isOpen: place.opening_hours?.isOpen?.()
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            resolve();
-                        });
-                    })
-                ));
+                const processed = await Promise.all(results.map(async place => {
+                    const dist = calculateDistance(userLocation.lat, userLocation.lng, place.geometry.location.lat(), place.geometry.location.lng());
+                    if (dist > distance) return null;
 
-                const sorted = Array.from(allResults.values()).sort((a, b) =>
-                    a.distance !== b.distance ? a.distance - b.distance : (b.rating || 0) - (a.rating || 0)
-                );
+                    // Get details for phone and hours
+                    const details = await new Promise(resolve => {
+                        placesServiceRef.current.getDetails({
+                            placeId: place.place_id,
+                            fields: ['formatted_phone_number', 'opening_hours', 'photos']
+                        }, (result, status) => resolve(status === google.maps.places.PlacesServiceStatus.OK ? result : null));
+                    });
 
-                setRestaurants(sorted);
+                    return {
+                        placeId: place.place_id,
+                        name: place.name,
+                        rating: place.rating,
+                        reviewCount: place.user_ratings_total,
+                        distance: dist,
+                        priceLevel: place.price_level,
+                        location: { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
+                        matchedFoods: [trimmed],
+                        address: place.vicinity,
+                        isOpen: place.opening_hours?.isOpen?.(),
+                        phone: details?.formatted_phone_number,
+                        hours: details?.opening_hours?.weekday_text?.[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1],
+                        photo: details?.photos?.[0]?.getUrl({ maxWidth: 400 }) || place.photos?.[0]?.getUrl({ maxWidth: 400 })
+                    };
+                }));
 
-                sorted.forEach((r, i) => {
+                setRestaurants(processed.filter(Boolean));
+                setSearchLoading(false);
+            };
+
+            // Filter and sort restaurants
+            const filteredRestaurants = useMemo(() => {
+                let result = [...restaurants];
+
+                if (openOnly) result = result.filter(r => r.isOpen);
+                if (priceFilter.length > 0) result = result.filter(r => r.priceLevel != null && priceFilter.includes(r.priceLevel));
+
+                result.sort((a, b) => {
+                    if (sortBy === 'distance') return a.distance - b.distance;
+                    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+                    if (sortBy === 'price') return (a.priceLevel || 5) - (b.priceLevel || 5);
+                    return 0;
+                });
+
+                return result;
+            }, [restaurants, openOnly, priceFilter, sortBy]);
+
+            // Add markers
+            useEffect(() => {
+                if (!mapInstanceRef.current) return;
+                markersRef.current.forEach(m => m.setMap(null));
+                markersRef.current = [];
+
+                filteredRestaurants.forEach((r, i) => {
                     const marker = new google.maps.Marker({
                         position: r.location,
                         map: mapInstanceRef.current,
                         label: { text: String(i + 1), color: '#fff', fontWeight: 'bold', fontSize: '12px' },
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 18,
-                            fillColor: '#d32323',
-                            fillOpacity: 1,
-                            strokeColor: '#fff',
-                            strokeWeight: 2
-                        }
+                        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 18, fillColor: '#d32323', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
                     });
                     marker.addListener('click', () => {
                         setSelectedRestaurant(r.placeId);
@@ -1071,26 +1438,18 @@
                     markersRef.current.push(marker);
                 });
 
-                if (sorted.length) {
+                if (filteredRestaurants.length && mapInstanceRef.current) {
                     const bounds = new google.maps.LatLngBounds();
                     bounds.extend(userLocation);
-                    sorted.forEach(r => bounds.extend(r.location));
+                    filteredRestaurants.forEach(r => bounds.extend(r.location));
                     mapInstanceRef.current.fitBounds(bounds, 50);
                 }
+            }, [filteredRestaurants, userLocation]);
 
-                setSearchLoading(false);
+            const handleCuisineClick = (cuisine) => {
+                setSearchQuery(cuisine);
+                searchRestaurants(cuisine);
             };
-
-            const handleCardClick = (placeId) => {
-                setSelectedRestaurant(placeId);
-                const r = restaurants.find(r => r.placeId === placeId);
-                if (r && mapInstanceRef.current) {
-                    mapInstanceRef.current.panTo(r.location);
-                    mapInstanceRef.current.setZoom(16);
-                }
-            };
-
-            const filteredRestaurants = openOnly ? restaurants.filter(r => r.isOpen) : restaurants;
 
             return (
                 <div className="app-container">
@@ -1100,125 +1459,185 @@
                                 <span className="logo-icon">🍔</span>
                                 <h1>Food Finder</h1>
                             </div>
-                            <div className="location-badge">
-                                <div className={`location-dot ${locationError ? 'error' : ''} ${locationLoading ? 'loading' : ''}`} />
-                                <span>
-                                    {locationLoading ? 'Finding you...' :
-                                     locationError ? locationError :
-                                     'Location found'}
-                                </span>
+
+                            <div className="nav-tabs">
+                                <button className={`nav-tab ${activeTab === 'search' ? 'active' : ''}`} onClick={() => setActiveTab('search')}>🔍 Search</button>
+                                <button className={`nav-tab ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Saved</button>
+                                <button className={`nav-tab ${activeTab === 'voting' ? 'active' : ''}`} onClick={() => setActiveTab('voting')}>🗳️ Vote</button>
+                                <button className={`nav-tab ${activeTab === 'order' ? 'active' : ''}`} onClick={() => setActiveTab('order')}>📋 Order</button>
                             </div>
+
+                            <button className="theme-toggle" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                                {theme === 'light' ? '🌙' : '☀️'}
+                            </button>
                         </div>
                     </header>
 
                     <main className="main-content">
-                        <div className="foods-panel">
-                            <FoodsPanel
-                                foods={foods}
-                                onAddFood={addFood}
-                                onDeleteFood={deleteFood}
-                                onReorderFoods={reorderFoods}
-                            />
+                        {activeTab === 'search' && (
+                            <>
+                                <div className="quick-cuisines">
+                                    {CUISINES.map(c => (
+                                        <button key={c.name} className={`cuisine-btn ${searchQuery === c.name ? 'active' : ''}`} onClick={() => handleCuisineClick(c.name)}>
+                                            {c.emoji} {c.name}
+                                        </button>
+                                    ))}
+                                </div>
 
-                            <div className="controls-card">
-                                <div className="controls-row">
-                                    <div className="control-group">
-                                        <span className="control-label">Distance</span>
-                                        <div className="distance-buttons">
-                                            {DISTANCE_OPTIONS.map(d => (
-                                                <button
-                                                    key={d}
-                                                    className={`distance-btn ${distance === d ? 'active' : ''}`}
-                                                    onClick={() => setDistance(d)}
-                                                >
-                                                    {d} mi
-                                                </button>
+                                <div className="search-section">
+                                    <form className="search-row" onSubmit={e => { e.preventDefault(); searchRestaurants(); }}>
+                                        <div className="search-input-group">
+                                            <label className="input-label">What are you craving?</label>
+                                            <input
+                                                type="text"
+                                                className="search-input"
+                                                placeholder="Pizza, sushi, tacos..."
+                                                value={searchQuery}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="filter-group">
+                                            <label className="input-label">Distance</label>
+                                            <div style={{display: 'flex', gap: '4px'}}>
+                                                {[5, 10, 15, 25].map(d => (
+                                                    <button key={d} type="button" className={`filter-btn ${distance === d ? 'active' : ''}`} onClick={() => setDistance(d)}>
+                                                        {d}mi
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <button type="submit" className="search-btn" disabled={!userLocation || searchLoading}>
+                                            {searchLoading ? 'Searching...' : '🔍 Search'}
+                                        </button>
+                                    </form>
+
+                                    {recentSearches.length > 0 && (
+                                        <div className="recent-searches">
+                                            <span className="recent-label">Recent:</span>
+                                            {recentSearches.slice(0, 5).map(s => (
+                                                <button key={s} className="recent-tag" onClick={() => { setSearchQuery(s); searchRestaurants(s); }}>{s}</button>
                                             ))}
                                         </div>
-                                    </div>
-
-                                    <div className="control-group">
-                                        <span className="control-label">Filter</span>
-                                        <div className="toggle-container">
-                                            <label className="toggle">
-                                                <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} />
-                                                <div className="toggle-track" />
-                                                <div className="toggle-thumb" />
-                                            </label>
-                                            <span className="toggle-label">Open Now</span>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className="search-btn"
-                                        onClick={searchRestaurants}
-                                        disabled={!userLocation || !foods.length || searchLoading}
-                                    >
-                                        {searchLoading ? 'Searching...' : '🔍 Find Food'}
-                                    </button>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="results-panel">
-                            <div className="results-header">
-                                <h2 className="results-title">Nearby Restaurants</h2>
-                                {filteredRestaurants.length > 0 && (
-                                    <span className="results-count">
-                                        {filteredRestaurants.length} found
-                                        {openOnly && restaurants.length !== filteredRestaurants.length && ` of ${restaurants.length}`}
-                                    </span>
+                                <div className="filters-bar">
+                                    <div className="filter-section">
+                                        <span className="filter-label">Price:</span>
+                                        {[0, 1, 2, 3].map(p => (
+                                            <button
+                                                key={p}
+                                                className={`filter-btn ${priceFilter.includes(p) ? 'active' : ''}`}
+                                                onClick={() => setPriceFilter(priceFilter.includes(p) ? priceFilter.filter(x => x !== p) : [...priceFilter, p])}
+                                            >
+                                                {'$'.repeat(p + 1)}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="filter-section">
+                                        <span className="filter-label">Open Now</span>
+                                        <label className="toggle-switch">
+                                            <input type="checkbox" checked={openOnly} onChange={e => setOpenOnly(e.target.checked)} />
+                                            <div className="toggle-track" />
+                                            <div className="toggle-thumb" />
+                                        </label>
+                                    </div>
+
+                                    <div className="filter-section">
+                                        <span className="filter-label">Sort:</span>
+                                        <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                                            <option value="distance">Distance</option>
+                                            <option value="rating">Rating</option>
+                                            <option value="price">Price</option>
+                                        </select>
+                                    </div>
+
+                                    {filteredRestaurants.length > 0 && (
+                                        <span className="results-count">{filteredRestaurants.length} restaurants</span>
+                                    )}
+                                </div>
+
+                                <div className="map-results-container">
+                                    <div className="map-container">
+                                        {!userLocation ? (
+                                            <div className="map-placeholder">
+                                                <div className="map-placeholder-icon">📍</div>
+                                                <p>{locationLoading ? 'Getting location...' : 'Enable location access'}</p>
+                                            </div>
+                                        ) : (
+                                            <div id="map" ref={mapRef} style={{width: '100%', height: '100%'}} />
+                                        )}
+                                        {searchLoading && (
+                                            <div className="loading-overlay">
+                                                <div className="loading-spinner" />
+                                                <span>Finding restaurants...</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="restaurants-list">
+                                        {filteredRestaurants.length === 0 ? (
+                                            <div className="empty-state">
+                                                <div className="empty-state-icon">🍽️</div>
+                                                <h3>{restaurants.length === 0 ? 'Search for food' : 'No matches'}</h3>
+                                                <p>{restaurants.length === 0 ? 'Enter what you\'re craving' : 'Try adjusting your filters'}</p>
+                                            </div>
+                                        ) : (
+                                            filteredRestaurants.map(r => (
+                                                <div key={r.placeId} data-place-id={r.placeId}>
+                                                    <RestaurantCard
+                                                        restaurant={r}
+                                                        isFavorite={favorites.some(f => f.placeId === r.placeId)}
+                                                        onToggleFavorite={toggleFavorite}
+                                                        isSelected={selectedRestaurant === r.placeId}
+                                                        onClick={() => {
+                                                            setSelectedRestaurant(r.placeId);
+                                                            mapInstanceRef.current?.panTo(r.location);
+                                                            mapInstanceRef.current?.setZoom(16);
+                                                        }}
+                                                    />
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'favorites' && (
+                            <div>
+                                <h2 style={{marginBottom: '20px', fontSize: '24px'}}>❤️ Saved Restaurants ({favorites.length})</h2>
+                                {favorites.length === 0 ? (
+                                    <div className="empty-state">
+                                        <div className="empty-state-icon">❤️</div>
+                                        <h3>No favorites yet</h3>
+                                        <p>Tap the heart on restaurants to save them</p>
+                                    </div>
+                                ) : (
+                                    <div className="favorites-grid">
+                                        {favorites.map(r => (
+                                            <RestaurantCard
+                                                key={r.placeId}
+                                                restaurant={r}
+                                                isFavorite={true}
+                                                onToggleFavorite={toggleFavorite}
+                                                isSelected={false}
+                                                onClick={() => {}}
+                                            />
+                                        ))}
+                                    </div>
                                 )}
                             </div>
+                        )}
 
-                            <div className="map-results-container">
-                                <div className="map-container">
-                                    {!userLocation ? (
-                                        <div className="map-placeholder">
-                                            <div className="map-placeholder-icon">📍</div>
-                                            <p>{locationLoading ? 'Getting your location...' : 'Enable location to see map'}</p>
-                                        </div>
-                                    ) : (
-                                        <div id="map" ref={mapRef} />
-                                    )}
-                                    {searchLoading && (
-                                        <div className="loading-overlay">
-                                            <div className="loading-spinner" />
-                                            <span>Finding delicious places...</span>
-                                        </div>
-                                    )}
-                                </div>
+                        {activeTab === 'voting' && (
+                            <GroupVoting restaurants={restaurants} favorites={favorites} />
+                        )}
 
-                                <div className="restaurants-list">
-                                    {filteredRestaurants.length === 0 ? (
-                                        <div className="empty-results">
-                                            <div className="empty-results-icon">🍽️</div>
-                                            <h3>
-                                                {foods.length === 0 ? 'Add some foods!' :
-                                                 restaurants.length === 0 ? 'Ready to search' :
-                                                 'No open restaurants'}
-                                            </h3>
-                                            <p>
-                                                {foods.length === 0 ? 'Tell us what you\'re craving' :
-                                                 restaurants.length === 0 ? 'Click "Find Food" to discover nearby spots' :
-                                                 'Try turning off the "Open Now" filter'}
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        filteredRestaurants.map(restaurant => (
-                                            <div key={restaurant.placeId} data-place-id={restaurant.placeId}>
-                                                <RestaurantCard
-                                                    restaurant={restaurant}
-                                                    isSelected={selectedRestaurant === restaurant.placeId}
-                                                    onClick={() => handleCardClick(restaurant.placeId)}
-                                                    userLocation={userLocation}
-                                                />
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        {activeTab === 'order' && (
+                            <GroupOrder restaurants={restaurants} favorites={favorites} voters={JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTERS) || '[]')} />
+                        )}
                     </main>
 
                     <footer className="footer">
@@ -1231,9 +1650,7 @@
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
         }
     </script>
 </body>
